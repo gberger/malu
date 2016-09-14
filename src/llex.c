@@ -12,6 +12,7 @@
 
 #include <locale.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "lua.h"
 
@@ -519,6 +520,11 @@ static int llex (LexState *ls, SemInfo *seminfo) {
       }
       case EOZ: {
         return TK_EOS;
+      }
+      case '@': {
+        next(ls);
+        printf("Found @");
+        break;
       }
       default: {
         if (lislalpha(ls->current)) {  /* identifier or reserved word? */
