@@ -1,6 +1,6 @@
 function mymacro (v)
-    print(v)
-    return
+    print("Dentro da macro: " .. v)
+    return "retorno"
 end
 
 print("comeco")

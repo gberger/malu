@@ -542,8 +542,9 @@ static int llex (LexState *ls, SemInfo *seminfo) {
 #endif
 
           lua_getglobal(ls->L, getstr(ts));
-          lua_pushliteral(ls->L, "fui chamada com argumentos");
-          lua_call(ls->L, 1, 0);
+          lua_pushliteral(ls->L, "argumento");
+          lua_call(ls->L, 1, 1);
+          printf("Retorno: %s\n", lua_tolstring(ls->L, -1, NULL));
         }
 
         break;
