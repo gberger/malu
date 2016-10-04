@@ -524,7 +524,10 @@ static int llex (LexState *ls, SemInfo *seminfo) {
       }
       case '@': {
         next(ls);
+
+#if defined(LUA_MACRO_DEBUG)
         printf("Found @\n");
+#endif
 
         if (!lislalpha(ls->current)) {  /* identifier or reserved word? */
           lexerror(ls, "invalid macro", TK_STRING);
@@ -533,7 +536,10 @@ static int llex (LexState *ls, SemInfo *seminfo) {
             save_and_next(ls);
           } while (lislalnum(ls->current));
           TString *ts = luaX_newstring(ls, luaZ_buffer(ls->buff), luaZ_bufflen(ls->buff));
+
+#if defined(LUA_MACRO_DEBUG)
           printf("Macro name: %s\n", getstr(ts));
+#endif
 
           lua_getglobal(ls->L, getstr(ts));
           lua_pushliteral(ls->L, "fui chamada com argumentos");
