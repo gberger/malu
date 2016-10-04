@@ -536,7 +536,8 @@ static int llex (LexState *ls, SemInfo *seminfo) {
           printf("Macro name: %s\n", getstr(ts));
 
           lua_getglobal(ls->L, getstr(ts));
-          lua_call(ls->L, 0, 0);
+          lua_pushliteral(ls->L, "fui chamada com argumentos");
+          lua_call(ls->L, 1, 0);
         }
 
         break;

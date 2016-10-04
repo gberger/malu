@@ -1,3 +1,5 @@
-function mymacro () print"fui chamada!" end
+function mymacro (v)
+    print(v)
+end
 
 load("@mymacro")
