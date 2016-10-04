@@ -45,7 +45,8 @@ static const char *const luaX_tokens [] = {
     "return", "then", "true", "until", "while",
     "//", "..", "...", "==", ">=", "<=", "~=",
     "<<", ">>", "::", "<eof>",
-    "<number>", "<integer>", "<name>", "<string>"
+    "<number>", "<integer>", "<name>", "<string>",
+    "<macro>"
 };
 
 
@@ -523,7 +524,21 @@ static int llex (LexState *ls, SemInfo *seminfo) {
       }
       case '@': {
         next(ls);
-        printf("Found @");
+        printf("Found @\n");
+
+        if (!lislalpha(ls->current)) {  /* identifier or reserved word? */
+          lexerror(ls, "invalid macro", TK_STRING);
+        } else {
+          do {
+            save_and_next(ls);
+          } while (lislalnum(ls->current));
+          TString *ts = luaX_newstring(ls, luaZ_buffer(ls->buff), luaZ_bufflen(ls->buff));
+          printf("Macro name: %s\n", getstr(ts));
+
+          lua_getglobal(ls->L, getstr(ts));
+          lua_call(ls->L, 0, 0);
+        }
+
         break;
       }
       default: {
