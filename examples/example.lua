@@ -1,8 +1,19 @@
-function mymacro (v)
-    print("Dentro da macro: " .. v)
-    return "retorno"
+function mymacro(v)
+    return "abc"
 end
 
 print("comeco")
-load("@mymacro")
-print("meio")
+
+f, e = load("abc=5; print(1 + @mymacro@ )")
+
+if type(f) == 'function' then
+    f()
+elseif type(f) == 'table' then
+    for k, v in pairs(f) do
+        print(k, v)
+    end
+else
+   print('f não é function nem table, nil?')
+end
+
+print("fim")

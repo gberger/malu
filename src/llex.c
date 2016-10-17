@@ -28,9 +28,19 @@
 #include "ltable.h"
 #include "lzio.h"
 
+void next(LexState *ls) {
+  if (ls->macro_output) {
+    ls->current = ls->macro_output[0];
+    (ls->macro_output)++;
+    if (ls->macro_output[0] == '\0') {
+      ls->macro_output = NULL;
+    }
+  } else {
+    ls->current = zgetc(ls->z);
+  }
 
-
-#define next(ls) (ls->current = zgetc(ls->z))
+//  printf("current '%c' | ls->macro_output \"%s\"\n", ls->current, ls->macro_output);
+}
 
 
 
@@ -173,6 +183,7 @@ void luaX_setinput (lua_State *L, LexState *ls, ZIO *z, TString *source,
   ls->lastline = 1;
   ls->source = source;
   ls->envn = luaS_newliteral(L, LUA_ENV);  /* get env name */
+  ls->macro_output = NULL;
   luaZ_resizebuffer(ls->L, ls->buff, LUA_MINBUFFER);  /* initialize buffer */
 }
 
@@ -440,6 +451,27 @@ static int llex (LexState *ls, SemInfo *seminfo) {
         next(ls);
         break;
       }
+      case '@': {
+        next(ls);
+
+        if (!lislalpha(ls->current)) {  /* identifier or reserved word? */
+          lexerror(ls, "invalid macro", TK_STRING);
+        } else {
+          do {
+            save_and_next(ls);
+          } while (lislalnum(ls->current));
+          TString *ts = luaX_newstring(ls, luaZ_buffer(ls->buff), luaZ_bufflen(ls->buff));
+
+          lua_getglobal(ls->L, getstr(ts));
+          lua_pushliteral(ls->L, "argumento");
+          lua_call(ls->L, 1, 1);
+          ls->macro_output = (char*) lua_tolstring(ls->L, -1, NULL);
+          lua_pop(ls->L, 1);
+          luaZ_resetbuffer(ls->buff);
+        }
+        next(ls);
+        break;
+      }
       case '-': {  /* '-' or '--' (comment) */
         next(ls);
         if (ls->current != '-') return '-';
@@ -522,33 +554,6 @@ static int llex (LexState *ls, SemInfo *seminfo) {
       case EOZ: {
         return TK_EOS;
       }
-      case '@': {
-        next(ls);
-
-#if defined(LUA_MACRO_DEBUG)
-        printf("Found @\n");
-#endif
-
-        if (!lislalpha(ls->current)) {  /* identifier or reserved word? */
-          lexerror(ls, "invalid macro", TK_STRING);
-        } else {
-          do {
-            save_and_next(ls);
-          } while (lislalnum(ls->current));
-          TString *ts = luaX_newstring(ls, luaZ_buffer(ls->buff), luaZ_bufflen(ls->buff));
-
-#if defined(LUA_MACRO_DEBUG)
-          printf("Macro name: %s\n", getstr(ts));
-#endif
-
-          lua_getglobal(ls->L, getstr(ts));
-          lua_pushliteral(ls->L, "argumento");
-          lua_call(ls->L, 1, 1);
-          printf("Retorno: %s\n", lua_tolstring(ls->L, -1, NULL));
-        }
-
-        break;
-      }
       default: {
         if (lislalpha(ls->current)) {  /* identifier or reserved word? */
           TString *ts;
@@ -581,14 +586,17 @@ void luaX_next (LexState *ls) {
     ls->t = ls->lookahead;  /* use this one */
     ls->lookahead.token = TK_EOS;  /* and discharge it */
   }
-  else
+  else {
     ls->t.token = llex(ls, &ls->t.seminfo);  /* read next token */
+//    printf("token: %d\n", ls->t.token);
+  }
 }
 
 
 int luaX_lookahead (LexState *ls) {
   lua_assert(ls->lookahead.token == TK_EOS);
   ls->lookahead.token = llex(ls, &ls->lookahead.seminfo);
+//  printf("token: %d\n", ls->lookahead.token);
   return ls->lookahead.token;
 }
 
