@@ -29,17 +29,28 @@
 #include "lzio.h"
 
 void next(LexState *ls) {
-  if (ls->macro_output) {
-    ls->current = ls->macro_output[0];
-    (ls->macro_output)++;
-    if (ls->macro_output[0] == '\0') {
-      ls->macro_output = NULL;
+  lua_Integer current;
+  size_t len;
+  char const* str;
+
+  /* if top two in stack are number and string */
+  if (lua_type(ls->L, -1) == LUA_TNUMBER && lua_type(ls->L, -2) == LUA_TSTRING) {
+    current = lua_tointeger(ls->L, -1);
+    str = lua_tolstring(ls->L, -2, &len);
+
+    ls->current = str[current];
+
+    current++;
+    if (current == (long long) len) {
+      lua_pop(ls->L, 1);
+      lua_pop(ls->L, 1);
+    } else {
+      lua_pop(ls->L, 1);
+      lua_pushinteger(ls->L, current);
     }
   } else {
     ls->current = zgetc(ls->z);
   }
-
-//  printf("current '%c' | ls->macro_output \"%s\"\n", ls->current, ls->macro_output);
 }
 
 
@@ -183,7 +194,6 @@ void luaX_setinput (lua_State *L, LexState *ls, ZIO *z, TString *source,
   ls->lastline = 1;
   ls->source = source;
   ls->envn = luaS_newliteral(L, LUA_ENV);  /* get env name */
-  ls->macro_output = NULL;
   luaZ_resizebuffer(ls->L, ls->buff, LUA_MINBUFFER);  /* initialize buffer */
 }
 
@@ -474,11 +484,12 @@ static int llex (LexState *ls, SemInfo *seminfo) {
 
           /* if the function call returns a string, add it to the lex queue */
           if (lua_type(ls->L, -1) == LUA_TSTRING) {
-            ls->macro_output = (char*) lua_tolstring(ls->L, -1, NULL);
+            lua_pushinteger(ls->L, 0);
+          } else {
+            /* pop the return */
+            lua_pop(ls->L, 1);
           }
 
-          /* pop the argument & reset the buffer populated by save_and_next */
-          lua_pop(ls->L, 1);
           luaZ_resetbuffer(ls->buff);
         }
 

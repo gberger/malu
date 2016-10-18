@@ -3,7 +3,7 @@ function innermacro(v)
 end
 
 function mymacro(v)
-    return "@innermacro@ + 10"
+    return "@innermacro@ + 10 + @innermacro@"
 end
 
 print("comeco")
