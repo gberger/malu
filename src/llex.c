@@ -29,26 +29,29 @@
 #include "lzio.h"
 
 void next(LexState *ls) {
-  lua_Integer current;
+  lua_Integer str_index;
   size_t len;
   char const* str;
 
-  /* if top two in stack are number and string */
   if (lua_type(ls->L, -1) == LUA_TNUMBER && lua_type(ls->L, -2) == LUA_TSTRING) {
-    current = lua_tointeger(ls->L, -1);
+    /* if top two in stack are number and string, macro expansion */
+    str_index = lua_tointeger(ls->L, -1);
     str = lua_tolstring(ls->L, -2, &len);
 
-    ls->current = str[current];
+    ls->current = str[str_index];
 
-    current++;
-    if (current == (long long) len) {
+    str_index++;
+    if (str_index == (long long) len) {
+      /* reached the end of the string, pop the idx and the str */
       lua_pop(ls->L, 1);
       lua_pop(ls->L, 1);
     } else {
+      /* pop old index and push new */
       lua_pop(ls->L, 1);
-      lua_pushinteger(ls->L, current);
+      lua_pushinteger(ls->L, str_index);
     }
   } else {
+    /* classic next */
     ls->current = zgetc(ls->z);
   }
 }
