@@ -44,8 +44,7 @@ void next(LexState *ls) {
     str_index++;
     if (str_index == (long long) len) {
       /* reached the end of the string, pop the idx and the str */
-      lua_pop(ls->L, 1);
-      lua_pop(ls->L, 1);
+      lua_pop(ls->L, 2);
     } else {
       /* pop old index and push new */
       lua_pop(ls->L, 1);
