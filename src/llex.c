@@ -16,6 +16,7 @@
 
 #include "lua.h"
 
+#include "lauxlib.h"
 #include "lctype.h"
 #include "ldebug.h"
 #include "ldo.h"
@@ -485,8 +486,9 @@ static int llex (LexState *ls, SemInfo *seminfo) {
           lua_pushliteral(ls->L, "argumento");
           lua_call(ls->L, 1, 1);
 
-          /* if the function call returns a string, add it to the lex queue */
-          if (lua_type(ls->L, -1) == LUA_TSTRING) {
+          /* if the function call returns a non-empty string,
+             add it to the lex queue */
+          if (lua_type(ls->L, -1) == LUA_TSTRING && luaL_len(ls->L, -1) > 0) {
             lua_pushinteger(ls->L, 0);
           } else {
             /* pop the return */
