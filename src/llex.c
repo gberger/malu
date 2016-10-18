@@ -451,24 +451,38 @@ static int llex (LexState *ls, SemInfo *seminfo) {
         next(ls);
         break;
       }
-      case '@': {
+      case '@': {  /* @macro@ */
         next(ls);
 
-        if (!lislalpha(ls->current)) {  /* identifier or reserved word? */
-          lexerror(ls, "invalid macro", TK_STRING);
+        /* macro name is `[A-Za-z][A-Za-z0-0]*` */
+        if (!lislalpha(ls->current)) {
+          lexerror(ls, "invalid macro", '@');
         } else {
+          /* populate ls->buff until we run out of alphanum */
           do {
             save_and_next(ls);
           } while (lislalnum(ls->current));
-          TString *ts = luaX_newstring(ls, luaZ_buffer(ls->buff), luaZ_bufflen(ls->buff));
 
+          /* create string from the buffer */
+          TString *ts = luaX_newstring(ls, luaZ_buffer(ls->buff),
+                                       luaZ_bufflen(ls->buff));
+
+          /* get global function from macro name and call it */
           lua_getglobal(ls->L, getstr(ts));
           lua_pushliteral(ls->L, "argumento");
           lua_call(ls->L, 1, 1);
-          ls->macro_output = (char*) lua_tolstring(ls->L, -1, NULL);
+
+          /* if the function call returns a string, add it to the lex queue */
+          if (lua_type(ls->L, -1) == LUA_TSTRING) {
+            ls->macro_output = (char*) lua_tolstring(ls->L, -1, NULL);
+          }
+
+          /* pop the argument & reset the buffer populated by save_and_next */
           lua_pop(ls->L, 1);
           luaZ_resetbuffer(ls->buff);
         }
+
+        /* skip the ending '@' */
         next(ls);
         break;
       }
