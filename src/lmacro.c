@@ -9,24 +9,12 @@
 #include "lprefix.h"
 
 
-#include <locale.h>
-#include <string.h>
-#include <stdio.h>
-
 #include "lua.h"
 
 #include "lauxlib.h"
 #include "lctype.h"
 #include "ldebug.h"
-#include "ldo.h"
-#include "lgc.h"
 #include "llex.h"
-#include "lobject.h"
-#include "lparser.h"
-#include "lstate.h"
-#include "lstring.h"
-#include "ltable.h"
-#include "lzio.h"
 
 
 
