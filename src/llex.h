@@ -82,4 +82,12 @@ LUAI_FUNC l_noret luaX_syntaxerror (LexState *ls, const char *s);
 LUAI_FUNC const char *luaX_token2str (LexState *ls, int token);
 
 
+void next (LexState *ls);
+void save (LexState *ls, int c);
+
+#define save_and_next(ls) (save(ls, ls->current), next(ls))
+
+l_noret lexerror (LexState *ls, const char *msg, int token);
+
+
 #endif

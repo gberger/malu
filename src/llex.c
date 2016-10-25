@@ -22,12 +22,31 @@
 #include "ldo.h"
 #include "lgc.h"
 #include "llex.h"
+#include "lmacro.h"
 #include "lobject.h"
 #include "lparser.h"
 #include "lstate.h"
 #include "lstring.h"
 #include "ltable.h"
 #include "lzio.h"
+#include "lmacro.h"
+
+
+#define currIsNewline(ls)	(ls->current == '\n' || ls->current == '\r')
+
+
+/* ORDER RESERVED */
+static const char *const luaX_tokens [] = {
+    "and", "break", "do", "else", "elseif",
+    "end", "false", "for", "function", "goto", "if",
+    "in", "local", "nil", "not", "or", "repeat",
+    "return", "then", "true", "until", "while",
+    "//", "..", "...", "==", ">=", "<=", "~=",
+    "<<", ">>", "::", "<eof>",
+    "<number>", "<integer>", "<name>", "<string>",
+    "<macro>"
+};
+
 
 void next(LexState *ls) {
   lua_Integer str_index;
@@ -57,30 +76,7 @@ void next(LexState *ls) {
 }
 
 
-
-#define currIsNewline(ls)	(ls->current == '\n' || ls->current == '\r')
-
-
-/* ORDER RESERVED */
-static const char *const luaX_tokens [] = {
-    "and", "break", "do", "else", "elseif",
-    "end", "false", "for", "function", "goto", "if",
-    "in", "local", "nil", "not", "or", "repeat",
-    "return", "then", "true", "until", "while",
-    "//", "..", "...", "==", ">=", "<=", "~=",
-    "<<", ">>", "::", "<eof>",
-    "<number>", "<integer>", "<name>", "<string>",
-    "<macro>"
-};
-
-
-#define save_and_next(ls) (save(ls, ls->current), next(ls))
-
-
-static l_noret lexerror (LexState *ls, const char *msg, int token);
-
-
-static void save (LexState *ls, int c) {
+void save (LexState *ls, int c) {
   Mbuffer *b = ls->buff;
   if (luaZ_bufflen(b) + 1 > luaZ_sizebuffer(b)) {
     size_t newsize;
@@ -132,7 +128,7 @@ static const char *txtToken (LexState *ls, int token) {
 }
 
 
-static l_noret lexerror (LexState *ls, const char *msg, int token) {
+l_noret lexerror (LexState *ls, const char *msg, int token) {
   msg = luaG_addinfo(ls->L, msg, ls->source, ls->linenumber);
   if (token)
     luaO_pushfstring(ls->L, "%s near %s", msg, txtToken(ls, token));
@@ -465,40 +461,7 @@ static int llex (LexState *ls, SemInfo *seminfo) {
         break;
       }
       case '@': {  /* @macro@ */
-        next(ls);
-
-        /* macro name is `[A-Za-z][A-Za-z0-0]*` */
-        if (!lislalpha(ls->current)) {
-          lexerror(ls, "invalid macro", '@');
-        } else {
-          /* populate ls->buff until we run out of alphanum */
-          do {
-            save_and_next(ls);
-          } while (lislalnum(ls->current));
-
-          /* create string from the buffer */
-          TString *ts = luaX_newstring(ls, luaZ_buffer(ls->buff),
-                                       luaZ_bufflen(ls->buff));
-
-          /* get global function from macro name and call it */
-          lua_getglobal(ls->L, getstr(ts));
-          lua_pushliteral(ls->L, "argumento");
-          lua_call(ls->L, 1, 1);
-
-          /* if the function call returns a non-empty string,
-             add it to the lex queue */
-          if (lua_type(ls->L, -1) == LUA_TSTRING && luaL_len(ls->L, -1) > 0) {
-            lua_pushinteger(ls->L, 0);
-          } else {
-            /* pop the return */
-            lua_pop(ls->L, 1);
-          }
-
-          luaZ_resetbuffer(ls->buff);
-        }
-
-        /* skip the ending '@' */
-        next(ls);
+        read_macro(ls);
         break;
       }
       case '-': {  /* '-' or '--' (comment) */
