@@ -15,7 +15,6 @@
 
 #include "lua.h"
 
-#include "lauxlib.h"
 #include "lctype.h"
 #include "ldebug.h"
 #include "ldo.h"
@@ -28,7 +27,6 @@
 #include "lstring.h"
 #include "ltable.h"
 #include "lzio.h"
-#include "lmacro.h"
 
 
 #define currIsNewline(ls)	(ls->current == '\n' || ls->current == '\r')
