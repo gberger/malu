@@ -15,6 +15,8 @@
 #include "lctype.h"
 #include "ldebug.h"
 #include "llex.h"
+#include "lmacro.h"
+
 
 
 /* This function will be closure-ed, receiving the LexState as an upvalue (in
@@ -64,6 +66,39 @@ void macro_next (LexState *ls) {
   }
 }
 
+char macro_look_next(LexState *ls) {
+  size_t t_len;
+  char const* str;
+  lua_Integer str_index;
+  size_t str_len;
+
+  t_len = lua_rawlen(ls->L, ls->msti);
+  lua_geti(ls->L, ls->msti, cast(lua_Integer, t_len));
+  str = lua_tolstring(ls->L, -1, &str_len);
+  lua_pop(ls->L, 1);
+  str_index = ls->msi[t_len - 1];
+
+  return str[str_index];
+}
+
+char look_next(LexState *ls) {
+  char c;
+
+  if (has_active_macros(ls)) {
+    c = macro_look_next(ls);
+  } else {
+    if (ls->z->n > 0) {
+      c = *ls->z->p;
+    } else {
+      c = cast(char, luaZ_fill(ls->z));
+      ls->z->n++;
+      ls->z->p--;
+    }
+  }
+
+  return c;
+}
+
 void read_macro (LexState *ls) {
   next(ls);
 
@@ -72,17 +107,17 @@ void read_macro (LexState *ls) {
     lexerror(ls, "invalid macro", '@');
   } else {
     /* populate ls->buff until we run out of alphanum */
-    do {
-      save_and_next(ls);
-    } while (lislalnum(ls->current));
+    while(1) {
+      save(ls, ls->current);
+      if (!lislalnum(look_next(ls)))
+        break;
+      next(ls);
+    };
 
     /* create string from the buffer */
     TString *ts = luaX_newstring(ls, luaZ_buffer(ls->buff),
                                  luaZ_bufflen(ls->buff));
     luaZ_resetbuffer(ls->buff);
-
-    /* skip the ending '@' */
-    next(ls);
 
     /* initialize macro string table if needed */
     if (ls->msti == 0) {
@@ -111,5 +146,7 @@ void read_macro (LexState *ls) {
       /* discard the return */
       lua_pop(ls->L, 1);
     }
+
+    next(ls);
   }
 }

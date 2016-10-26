@@ -3,13 +3,13 @@ function innermacro(next)
 end
 
 function mymacro(next)
-    print("Next token is: " .. next())
-    return "abc"
+--    print("Next token is: ")
+    return " @innermacro + @innermacro"
 end
 
 print("comeco")
 
-f, e = load("abc=5; print(1 + @mymacro@)")
+f, e = load("abc=5; print(1 + @mymacro)")
 if e then print('Load error: ' .. e) end
 if f then f() end
 
