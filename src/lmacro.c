@@ -22,8 +22,8 @@
  * obtain the next token. */
 static int get_next_token_closure(lua_State *L) {
   LexState *ls = lua_touserdata(L, lua_upvalueindex(1));
-  printf("I am in C. The current is: %c\n", ls->current);
-  return 0;
+  lua_pushnumber(ls->L, llex(ls, &ls->t.seminfo));
+  return 1;
 }
 
 
@@ -79,6 +79,10 @@ void read_macro (LexState *ls) {
     /* create string from the buffer */
     TString *ts = luaX_newstring(ls, luaZ_buffer(ls->buff),
                                  luaZ_bufflen(ls->buff));
+    luaZ_resetbuffer(ls->buff);
+
+    /* skip the ending '@' */
+    next(ls);
 
     /* initialize macro string table if needed */
     if (ls->msti == 0) {
@@ -107,10 +111,5 @@ void read_macro (LexState *ls) {
       /* discard the return */
       lua_pop(ls->L, 1);
     }
-
-    luaZ_resetbuffer(ls->buff);
   }
-
-  /* skip the ending '@' */
-  next(ls);
 }

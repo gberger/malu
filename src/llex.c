@@ -429,7 +429,7 @@ static void read_string (LexState *ls, int del, SemInfo *seminfo) {
 }
 
 
-static int llex (LexState *ls, SemInfo *seminfo) {
+int llex (LexState *ls, SemInfo *seminfo) {
   luaZ_resetbuffer(ls->buff);
   for (;;) {
     switch (ls->current) {
@@ -561,7 +561,6 @@ void luaX_next (LexState *ls) {
   }
   else {
     ls->t.token = llex(ls, &ls->t.seminfo);  /* read next token */
-//    printf("token: %d\n", ls->t.token);
   }
 }
 
@@ -569,7 +568,6 @@ void luaX_next (LexState *ls) {
 int luaX_lookahead (LexState *ls) {
   lua_assert(ls->lookahead.token == TK_EOS);
   ls->lookahead.token = llex(ls, &ls->lookahead.seminfo);
-//  printf("token: %d\n", ls->lookahead.token);
   return ls->lookahead.token;
 }
 

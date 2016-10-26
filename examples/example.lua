@@ -1,14 +1,16 @@
-function innermacro(v)
+function innermacro(next)
     return "abc"
 end
 
-function mymacro(v)
-    v()
-    return "@innermacro@ + (function () return @innermacro@ end)() + @innermacro@"
+function mymacro(next)
+    print("Next token is: " .. next())
+    return "abc"
 end
 
 print("comeco")
 
-load("abc=5; print(1 + @mymacro@)")()
+f, e = load("abc=5; print(1 + @mymacro@)")
+if e then print('Load error: ' .. e) end
+if f then f() end
 
 print("fim")

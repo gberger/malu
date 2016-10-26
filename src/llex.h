@@ -88,6 +88,7 @@ LUAI_FUNC const char *luaX_token2str (LexState *ls, int token);
 
 void next (LexState *ls);
 void save (LexState *ls, int c);
+int llex (LexState *ls, SemInfo *seminfo);
 
 #define save_and_next(ls) (save(ls, ls->current), next(ls))
 
