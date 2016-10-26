@@ -8,12 +8,24 @@
 
 #include "lprefix.h"
 
+#include <stdio.h>
 
 #include "lua.h"
 
 #include "lctype.h"
 #include "ldebug.h"
 #include "llex.h"
+
+
+/* This function will be closure-ed, receiving the LexState as an upvalue (in
+ * a light userdata), and passed to any macro. The macro can call it to
+ * obtain the next token. */
+static int get_next_token_closure(lua_State *L) {
+  LexState *ls = lua_touserdata(L, lua_upvalueindex(1));
+  printf("I am in C. The current is: %c\n", ls->current);
+  return 0;
+}
+
 
 void macro_next (LexState *ls) {
   size_t t_len;
@@ -74,9 +86,14 @@ void read_macro (LexState *ls) {
       ls->msti = lua_gettop(ls->L);
     }
 
-    /* get global function from macro name and call it */
+    /* get global function from macro name */
     lua_getglobal(ls->L, getstr(ts));
-    lua_pushliteral(ls->L, "argumento");
+
+    /* create C closure with the LexState */
+    lua_pushlightuserdata(ls->L, ls);
+    lua_pushcclosure(ls->L, get_next_token_closure, 1);
+
+    /* call the macro with the closure as a parameter */
     lua_call(ls->L, 1, 1);
 
     /* if the function call returns a non-empty string,

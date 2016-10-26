@@ -3,6 +3,7 @@ function innermacro(v)
 end
 
 function mymacro(v)
+    v()
     return "@innermacro@ + (function () return @innermacro@ end)() + @innermacro@"
 end
 
