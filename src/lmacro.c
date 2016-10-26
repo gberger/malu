@@ -137,6 +137,7 @@ void read_macro (LexState *ls) {
       if (ls->msti == 0) {
         lua_newtable(ls->L);
         lua_swap(ls->L);
+        ls->msti = lua_gettop(ls->L) - 1;
       }
 
       /* push the macro_str to the end of the macro_table, initialize msi */
