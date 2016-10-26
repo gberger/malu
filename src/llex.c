@@ -48,40 +48,9 @@ static const char *const luaX_tokens [] = {
 
 
 void next(LexState *ls) {
-  lua_Integer str_index;
-  size_t len;
-  size_t t_len;
-  char const* str;
-
   /* if we have a macro string table, and it's not empty */
-  if (ls->msti != 0 && (t_len = lua_rawlen(ls->L, ls->msti)) > 0) {
-    /* put the last string at the top of the stack */
-    lua_geti(ls->L, ls->msti, cast(lua_Integer, t_len));
-
-    /* get it from the stack */
-    str = lua_tolstring(ls->L, -1, &len);
-    lua_pop(ls->L, 1);
-
-    /* get the index we're at in this string */
-    str_index = ls->msi[t_len - 1];
-
-    /* store the char at that index, also increment the index */
-    ls->current = str[str_index];
-
-    str_index++;
-    ls->msi[t_len - 1] = cast(int, str_index);
-
-    if (ls->msi[t_len - 1] == (long long) len) {
-      /* reached the end of the string, remove it from the table */
-      lua_pushnil(ls->L);
-      lua_seti(ls->L, ls->msti, cast(lua_Integer, t_len));
-
-      if (t_len == 1) {
-        /* table is now empty, pop it */
-        ls->msti = 0;
-        lua_pop(ls->L, 1);
-      }
-    }
+  if (has_active_macros(ls)) {
+    macro_next(ls);
   } else {
     /* classic next */
     ls->current = zgetc(ls->z);

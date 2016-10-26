@@ -16,7 +16,42 @@
 #include "ldebug.h"
 #include "llex.h"
 
+void macro_next (LexState *ls) {
+  size_t t_len;
+  char const* str;
+  lua_Integer str_index;
+  size_t str_len;
 
+  t_len  = lua_rawlen(ls->L, ls->msti);
+
+  /* put the last string at the top of the stack */
+  lua_geti(ls->L, ls->msti, cast(lua_Integer, t_len));
+
+  /* get it from the stack */
+  str = lua_tolstring(ls->L, -1, &str_len);
+  lua_pop(ls->L, 1);
+
+  /* get the index we're at in this string */
+  str_index = ls->msi[t_len - 1];
+
+  /* store the char at that index, also increment the index */
+  ls->current = str[str_index];
+
+  str_index++;
+  ls->msi[t_len - 1] = cast(int, str_index);
+
+  if (ls->msi[t_len - 1] == (long long) str_len) {
+    /* reached the end of the string, remove it from the table */
+    lua_pushnil(ls->L);
+    lua_seti(ls->L, ls->msti, cast(lua_Integer, t_len));
+
+    if (t_len == 1) {
+      /* table is now empty, pop it */
+      ls->msti = 0;
+      lua_pop(ls->L, 1);
+    }
+  }
+}
 
 void read_macro (LexState *ls) {
   next(ls);
