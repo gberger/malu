@@ -17,6 +17,7 @@
 #include "llex.h"
 #include "lmacro.h"
 
+#define lua_swap(L) lua_insert(L, -2)
 
 
 /* This function will be closure-ed, receiving the LexState as an upvalue (in
@@ -119,12 +120,6 @@ void read_macro (LexState *ls) {
                                  luaZ_bufflen(ls->buff));
     luaZ_resetbuffer(ls->buff);
 
-    /* initialize macro string table if needed */
-    if (ls->msti == 0) {
-      lua_newtable(ls->L);
-      ls->msti = lua_gettop(ls->L);
-    }
-
     /* get global function from macro name */
     lua_getglobal(ls->L, getstr(ts));
 
@@ -138,6 +133,12 @@ void read_macro (LexState *ls) {
     /* if the function call returns a non-empty string,
        add it to the lex queue */
     if (lua_type(ls->L, -1) == LUA_TSTRING && lua_rawlen(ls->L, -1) > 0) {
+      /* initialize macro string table if needed */
+      if (ls->msti == 0) {
+        lua_newtable(ls->L);
+        lua_swap(ls->L);
+      }
+
       /* push the macro_str to the end of the macro_table, initialize msi */
       lua_seti(ls->L, ls->msti,
                cast(lua_Integer, lua_rawlen(ls->L, ls->msti)) + 1);
