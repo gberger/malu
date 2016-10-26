@@ -11,7 +11,6 @@
 
 #include "lua.h"
 
-#include "lauxlib.h"
 #include "lctype.h"
 #include "ldebug.h"
 #include "llex.h"
@@ -22,7 +21,7 @@ void macro_next (LexState *ls) {
   lua_Integer str_index;
   size_t str_len;
 
-  t_len  = lua_rawlen(ls->L, ls->msti);
+  t_len = lua_rawlen(ls->L, ls->msti);
 
   /* put the last string at the top of the stack */
   lua_geti(ls->L, ls->msti, cast(lua_Integer, t_len));
@@ -82,7 +81,7 @@ void read_macro (LexState *ls) {
 
     /* if the function call returns a non-empty string,
        add it to the lex queue */
-    if (lua_type(ls->L, -1) == LUA_TSTRING && luaL_len(ls->L, -1) > 0) {
+    if (lua_type(ls->L, -1) == LUA_TSTRING && lua_rawlen(ls->L, -1) > 0) {
       /* push the macro_str to the end of the macro_table, initialize msi */
       lua_seti(ls->L, ls->msti,
                cast(lua_Integer, lua_rawlen(ls->L, ls->msti)) + 1);
