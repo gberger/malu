@@ -34,6 +34,12 @@ void read_macro (LexState *ls) {
     TString *ts = luaX_newstring(ls, luaZ_buffer(ls->buff),
                                  luaZ_bufflen(ls->buff));
 
+    /* initialize macro string table if needed */
+    if (ls->msti == 0) {
+      lua_newtable(ls->L);
+      ls->msti = lua_gettop(ls->L);
+    }
+
     /* get global function from macro name and call it */
     lua_getglobal(ls->L, getstr(ts));
     lua_pushliteral(ls->L, "argumento");
@@ -42,9 +48,12 @@ void read_macro (LexState *ls) {
     /* if the function call returns a non-empty string,
        add it to the lex queue */
     if (lua_type(ls->L, -1) == LUA_TSTRING && luaL_len(ls->L, -1) > 0) {
-      lua_pushinteger(ls->L, 0);
+      /* push the macro_str to the end of the macro_table, initialize msi */
+      lua_seti(ls->L, ls->msti,
+               cast(lua_Integer, lua_rawlen(ls->L, ls->msti)) + 1);
+      ls->msi[lua_rawlen(ls->L, ls->msti) - 1] = 0;
     } else {
-      /* pop the return */
+      /* discard the return */
       lua_pop(ls->L, 1);
     }
 
