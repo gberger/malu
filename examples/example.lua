@@ -3,12 +3,12 @@ function innermacro(next)
 end
 
 function mymacro(next)
-    return "abc"
+    return "@innermacro + "
 end
 
 print("comeco")
 
-f, e = load("abc=5; print(1 + @mymacro )")
+f, e = load("abc=5; print(1 + @mymacro abc)")
 if e then print('Load error: ' .. e) end
 if f then f() end
 

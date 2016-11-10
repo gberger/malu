@@ -88,13 +88,9 @@ char look_next(LexState *ls) {
   if (has_active_macros(ls)) {
     c = macro_look_next(ls);
   } else {
-    if (ls->z->n > 0) {
-      c = *ls->z->p;
-    } else {
-      c = cast(char, luaZ_fill(ls->z));
-      ls->z->n++;
-      ls->z->p--;
-    }
+    c = cast(char, zgetc(ls->z));
+    ls->z->n++;
+    ls->z->p--;
   }
 
   return c;
