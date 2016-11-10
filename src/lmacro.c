@@ -22,7 +22,7 @@
 
 /* This function will be closure-ed, receiving the LexState as an upvalue (in
  * a light userdata), and passed to any macro. The macro can call it to
- * obtain the next token. */
+ * obtain the next char. */
 static int get_next_char_lua_closure(lua_State *L) {
   LexState *ls = lua_touserdata(L, lua_upvalueindex(1));
 
