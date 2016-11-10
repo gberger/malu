@@ -1,14 +1,4 @@
-function next_until(next, char)
-    local str = ''
-    local curr = next()
-
-    while curr ~= char do
-        str = str .. curr
-        curr = next()
-    end
-
-    return str
-end
+dofile"examples/_utils.lua"
 
 function using(next)
     next() -- skip opening parenthesis

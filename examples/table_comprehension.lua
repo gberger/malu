@@ -1,17 +1,5 @@
-function next_until(next, char)
-    local str = ''
-    local curr = next()
+dofile"examples/_utils.lua"
 
-    while curr ~= char do
-        str = str .. curr
-        curr = next()
-    end
-
-    return str
-end
-
-
--- macro
 function T(next)
     next() -- skip opening curly braces
 
@@ -31,12 +19,9 @@ function T(next)
 end
 
 
-f,e=load([[
+load([[
 local nums = {1, 2, 3}
 local squares = @T{num ^ 2 for num in nums}
 print(#squares)
 for k, v in ipairs(squares) do print(v) end
-]])
-
-print(e)
-f()
+]])()

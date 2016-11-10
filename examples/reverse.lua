@@ -1,14 +1,4 @@
-function next_while_match(next, pattern)
-    local str = ''
-    local current = next()
-
-    while string.match(current, pattern) do
-        str = str .. current
-        current = next()
-    end
-
-    return str, current
-end
+dofile"examples/_utils.lua"
 
 function reverse(next)
     next() -- skip opening parenthesis
