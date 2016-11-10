@@ -23,9 +23,12 @@
 /* This function will be closure-ed, receiving the LexState as an upvalue (in
  * a light userdata), and passed to any macro. The macro can call it to
  * obtain the next token. */
-static int get_next_token_closure(lua_State *L) {
+static int get_next_char_lua_closure(lua_State *L) {
   LexState *ls = lua_touserdata(L, lua_upvalueindex(1));
-  lua_pushnumber(ls->L, llex(ls, &ls->t.seminfo));
+
+  next(ls);
+  lua_pushfstring(ls->L, "%c", ls->current);
+
   return 1;
 }
 
@@ -121,7 +124,7 @@ void read_macro (LexState *ls) {
 
     /* create C closure with the LexState */
     lua_pushlightuserdata(ls->L, ls);
-    lua_pushcclosure(ls->L, get_next_token_closure, 1);
+    lua_pushcclosure(ls->L, get_next_char_lua_closure, 1);
 
     /* call the macro with the closure as a parameter */
     lua_call(ls->L, 1, 1);
