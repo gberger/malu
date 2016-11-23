@@ -27,6 +27,11 @@ static int get_next_char_lua_closure(lua_State *L) {
   LexState *ls = lua_touserdata(L, lua_upvalueindex(1));
 
   next(ls);
+  printf("next: %d (%c)\n", ls->current, ls->current);
+  if (ls->current == EOZ) {
+    return 0;
+  }
+
   lua_pushfstring(ls->L, "%c", ls->current);
 
   return 1;
