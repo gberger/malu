@@ -158,7 +158,7 @@ liolib.o: liolib.c lprefix.h lua.h luaconf.h lauxlib.h lualib.h
 llex.o: llex.c lprefix.h lua.h luaconf.h lctype.h llimits.h ldebug.h \
  lstate.h lobject.h ltm.h lzio.h lmacro.h lmem.h ldo.h lgc.h llex.h \
  lparser.h lstring.h ltable.h
-lmacro.o: lmacro.c llex.h
+lmacro.o: lmacro.c llex.h ldebug.h ldo.h
 lmathlib.o: lmathlib.c lprefix.h lua.h luaconf.h lauxlib.h lualib.h
 lmem.o: lmem.c lprefix.h lua.h luaconf.h ldebug.h lstate.h lobject.h \
  llimits.h ltm.h lzio.h lmem.h ldo.h lgc.h

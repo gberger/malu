@@ -14,6 +14,7 @@
 
 #include "lctype.h"
 #include "ldebug.h"
+#include "ldo.h"
 #include "llex.h"
 #include "lmacro.h"
 
@@ -130,8 +131,14 @@ void read_macro (LexState *ls) {
                                  luaZ_bufflen(ls->buff));
     luaZ_resetbuffer(ls->buff);
 
+
     /* get global function from macro name */
     lua_getglobal(ls->L, getstr(ts));
+
+    if (!lua_isfunction(ls->L, -1)) {
+      lua_pop(ls->L, 1);
+      return lexerror(ls, "macro does not exist", 0);
+    }
 
     /* create C closure with the LexState */
     lua_pushlightuserdata(ls->L, ls);
