@@ -25,14 +25,20 @@
  * obtain the next char. */
 static int get_next_char_lua_closure(lua_State *L) {
   LexState *ls = lua_touserdata(L, lua_upvalueindex(1));
+  char next_char[2] = {0, 0};
 
   next(ls);
-  printf("next: %d (%c)\n", ls->current, ls->current);
   if (ls->current == EOZ) {
+    (ls->z->n)++;
     return 0;
   }
 
-  lua_pushfstring(ls->L, "%c", ls->current);
+  if (ls->current == 10) {
+    ls->current = 32;
+  }
+
+  next_char[0] = cast(char, ls->current);
+  lua_pushstring(ls->L, next_char);
 
   return 1;
 }

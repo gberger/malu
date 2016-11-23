@@ -1,0 +1,27 @@
+----------------
+
+- Botei num arquivo separado, lmacro.c
+- Retirei o @ do final
+- Usando uma table na stack para guardar as strings, guardar a posição dessa table e os índices das strings no LexState
+- Passando uma closure com função get
+
+
+- Como evitar o uso das APIs?
+- Investigar uso do ZIO
+
+
+----------------
+
+- next char
+- next token
+- next token
+
+----------------
+
+
+- checar erros
+- load recebendo next
+- llex que recebe next
+-- lexstate, seminfo, zio novo
+-- lapi.c: lua_load
+-- lbaselib.c: luaB_load
