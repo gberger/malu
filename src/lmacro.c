@@ -19,7 +19,6 @@
 #include "ldo.h"
 #include "llex.h"
 #include "lmacro.h"
-#include "lualib.h"
 #include "lstring.h"
 #include "ltable.h"
 #include "lzio.h"
@@ -51,7 +50,7 @@ static int get_next_char_lua_closure(lua_State *L) {
   return 1;
 }
 
-static const char *get_from_next (lua_State *L, void *ud, size_t *size) {
+static const char *read_from_next(lua_State *L, void *ud, size_t *size) {
   UNUSED(L);
 
   lua_State* LS = (lua_State *) ud;
@@ -71,7 +70,7 @@ static const char *get_from_next (lua_State *L, void *ud, size_t *size) {
   return str;
 }
 
-static void luaX_tokenpushpair(lua_State *L, Token t) {
+static void tokenpushpair(lua_State *L, Token t) {
   if (t.token < FIRST_RESERVED) {
     lua_pushfstring(L, "%c", t.token);
     lua_pushfstring(L, "%c", t.token);
@@ -92,7 +91,7 @@ static void luaX_tokenpushpair(lua_State *L, Token t) {
 }
 
 static int get_next_token_lua_closure(lua_State *L) {
-  lua_Reader reader = get_from_next;
+  lua_Reader reader = read_from_next;
   void *data = L;
   const char *chunkname = "internal llex";
   lua_State* NS = luaL_newstate();
@@ -115,7 +114,7 @@ static int get_next_token_lua_closure(lua_State *L) {
   luaX_next(&ls);  /* read first token */
   NS->top--;  /* remove scanner's table */
 
-  luaX_tokenpushpair(L, ls.t);
+  tokenpushpair(L, ls.t);
 
   return 2;
 }
