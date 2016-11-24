@@ -76,11 +76,11 @@ static int get_next_token_lua_closure(lua_State *L) {
   void *data = &es;
   const char *chunkname = "?";
   const char *mode = NULL;
-  lua_State* new_state = luaL_newstate();
+  lua_State* NS = luaL_newstate();
   Mbuffer buff;
 
   ZIO z;
-  z.L = L;
+  z.L = NS;
   z.reader = reader;
   z.data = data;
   z.n = 0;
@@ -88,14 +88,14 @@ static int get_next_token_lua_closure(lua_State *L) {
 
 
   LexState ls;
-  ls.h = luaH_new(L);  /* create table for scanner */
-  sethvalue(L, L->top, ls.h);  /* anchor it */
-  luaD_inctop(L);
-  luaZ_initbuffer(L, &buff);
+  ls.h = luaH_new(NS);  /* create table for scanner */
+  sethvalue(NS, NS->top, ls.h);  /* anchor it */
+  luaD_inctop(NS);
+  luaZ_initbuffer(NS, &buff);
   ls.buff = &buff;
-  luaX_setinput(L, &ls, &z, luaS_new(L, "inside chunk name"), zgetc((&z)));
+  luaX_setinput(NS, &ls, &z, luaS_new(NS, "inside chunk name"), zgetc((&z)));
   luaX_next(&ls);  /* read first token */
-  L->top--;  /* remove scanner's table */
+  NS->top--;  /* remove scanner's table */
 
   printf("Token: %d ", ls.t);
   printf("%s\n", getstr(ls.t.seminfo.ts));
