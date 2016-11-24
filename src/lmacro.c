@@ -9,6 +9,7 @@
 #include "lprefix.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "lua.h"
 
@@ -46,11 +47,43 @@ static int get_next_char_lua_closure(lua_State *L) {
   return 1;
 }
 
+typedef struct EmbeddedString {
+  const char *s;
+  size_t size;
+} EmbeddedString;
+
+static const char *getE (lua_State *L, void *ud, size_t *size) {
+  EmbeddedString *ls = (EmbeddedString *)ud;
+  (void)L;  /* not used */
+  if (ls->size == 0) return NULL;
+  *size = ls->size;
+  ls->size = 0;
+  return ls->s;
+}
+
 
 static int get_next_token_lua_closure(lua_State *L) {
+  const char *str = "print('hello from inside new state')";
+
+  EmbeddedString es;
+  es.size = strlen(str);
+  es.s = str;
+
+  lua_Reader reader = getE;
+  void *data = &es;
+  const char *chunkname = "?";
+  const char *mode = NULL;
   lua_State* new_state = luaL_newstate();
+
+//  ZIO z;
+//  z.L = L;
+//  z.reader = getE;
+//  z.data = &es;
+//  z.n = 0;
+//  z.p = NULL;
+
   luaL_openlibs(new_state);
-  luaL_loadstring(new_state, "print('hello from inside new state')");
+  lua_load(new_state, reader, data, chunkname, mode);
   lua_pcall(new_state, 0, 0, 0);
 
   return 0;
