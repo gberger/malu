@@ -33,19 +33,6 @@
 #define currIsNewline(ls)	(ls->current == '\n' || ls->current == '\r')
 
 
-/* ORDER RESERVED */
-static const char *const luaX_tokens [] = {
-    "and", "break", "do", "else", "elseif",
-    "end", "false", "for", "function", "goto", "if",
-    "in", "local", "nil", "not", "or", "repeat",
-    "return", "then", "true", "until", "while",
-    "//", "..", "...", "==", ">=", "<=", "~=",
-    "<<", ">>", "::", "<eof>",
-    "<number>", "<integer>", "<name>", "<string>",
-    "<macro>"
-};
-
-
 void next(LexState *ls) {
   /* if we have a macro string table, and it's not empty */
   if (has_active_macros(ls)) {
@@ -88,7 +75,7 @@ const char *luaX_token2str (LexState *ls, int token) {
     return luaO_pushfstring(ls->L, "'%c'", token);
   }
   else {
-    const char *s = luaX_tokens[token - FIRST_RESERVED];
+    const char *s = TOKEN_NAME(token);
     if (token < TK_EOS)  /* fixed format (symbols and reserved words)? */
       return luaO_pushfstring(ls->L, "'%s'", s);
     else  /* names, strings, and numerals */
@@ -107,6 +94,7 @@ static const char *txtToken (LexState *ls, int token) {
       return luaX_token2str(ls, token);
   }
 }
+
 
 
 l_noret lexerror (LexState *ls, const char *msg, int token) {

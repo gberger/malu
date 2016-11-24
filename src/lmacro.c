@@ -71,6 +71,25 @@ static const char *get_from_next (lua_State *L, void *ud, size_t *size) {
   return str;
 }
 
+static void luaX_tokenpushpair(lua_State *L, Token t) {
+  if (t.token < FIRST_RESERVED) {
+    lua_pushfstring(L, "%c", t.token);
+    lua_pushfstring(L, "%c", t.token);
+  } else {
+    lua_pushstring(L, TOKEN_NAME(t.token));
+    if (t.token < TK_EOS) {
+      lua_pushstring(L, TOKEN_NAME(t.token));
+    } else if (t.token == TK_EOS) {
+      lua_pushnil(L);
+    } else if (t.token == TK_FLT) {
+      lua_pushnumber(L, t.seminfo.r);
+    } else if (t.token == TK_INT) {
+      lua_pushnumber(L, t.seminfo.i);
+    } else if (t.token == TK_NAME || t.token == TK_STRING) {
+      lua_pushstring(L, getstr(t.seminfo.ts));
+    }
+  }
+}
 
 static int get_next_token_lua_closure(lua_State *L) {
   lua_Reader reader = get_from_next;
@@ -96,10 +115,9 @@ static int get_next_token_lua_closure(lua_State *L) {
   luaX_next(&ls);  /* read first token */
   NS->top--;  /* remove scanner's table */
 
-  printf("Token: %d ", ls.t.token);
-  printf("%s\n", getstr(ls.t.seminfo.ts));
+  luaX_tokenpushpair(L, ls.t);
 
-  return 0;
+  return 2;
 }
 
 

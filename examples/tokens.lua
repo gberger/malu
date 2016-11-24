@@ -1,8 +1,14 @@
 function using(next, llex)
-    llex(next)
+    print(llex(next))
+    print(llex(next))
+    print(llex(next))
+    print(llex(next))
+    print(llex(next))
+    print(llex(next))
+    print(llex(next))
 end
 
 assert(load([[
 @using
-xyz('fora')
+3.14 123 abc 'xyz' <= ! ~=
 ]]))()

@@ -12,7 +12,7 @@
 
 
 #define FIRST_RESERVED	257
-
+#define NUM_MACRO_STRING 64
 
 #if !defined(LUA_ENV)
 #define LUA_ENV		"_ENV"
@@ -33,13 +33,26 @@ enum RESERVED {
   TK_IDIV, TK_CONCAT, TK_DOTS, TK_EQ, TK_GE, TK_LE, TK_NE,
   TK_SHL, TK_SHR,
   TK_DBCOLON, TK_EOS,
-  TK_FLT, TK_INT, TK_NAME, TK_STRING
+  TK_FLT, TK_INT, TK_NAME, TK_STRING,
+  TK_MACRO
+};
+
+/* ORDER RESERVED */
+static const char *const luaX_tokens [] = {
+    "and", "break", "do", "else", "elseif",
+    "end", "false", "for", "function", "goto", "if",
+    "in", "local", "nil", "not", "or", "repeat",
+    "return", "then", "true", "until", "while",
+    "//", "..", "...", "==", ">=", "<=", "~=",
+    "<<", ">>", "::", "<eof>",
+    "<number>", "<integer>", "<name>", "<string>",
+    "<macro>"
 };
 
 /* number of reserved words */
 #define NUM_RESERVED	(cast(int, TK_WHILE-FIRST_RESERVED+1))
 
-#define NUM_MACRO_STRING 64
+#define TOKEN_NAME(token) (luaX_tokens[token - FIRST_RESERVED])
 
 
 typedef union {
