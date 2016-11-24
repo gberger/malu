@@ -12,6 +12,7 @@
 
 #include <locale.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "lua.h"
 

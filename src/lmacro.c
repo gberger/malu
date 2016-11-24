@@ -20,6 +20,9 @@
 #include "llex.h"
 #include "lmacro.h"
 #include "lualib.h"
+#include "lstring.h"
+#include "ltable.h"
+#include "lzio.h"
 
 #define lua_swap(L) lua_insert(L, -2)
 
@@ -74,17 +77,28 @@ static int get_next_token_lua_closure(lua_State *L) {
   const char *chunkname = "?";
   const char *mode = NULL;
   lua_State* new_state = luaL_newstate();
+  Mbuffer buff;
 
-//  ZIO z;
-//  z.L = L;
-//  z.reader = getE;
-//  z.data = &es;
-//  z.n = 0;
-//  z.p = NULL;
+  ZIO z;
+  z.L = L;
+  z.reader = reader;
+  z.data = data;
+  z.n = 0;
+  z.p = NULL;
 
-  luaL_openlibs(new_state);
-  lua_load(new_state, reader, data, chunkname, mode);
-  lua_pcall(new_state, 0, 0, 0);
+
+  LexState ls;
+  ls.h = luaH_new(L);  /* create table for scanner */
+  sethvalue(L, L->top, ls.h);  /* anchor it */
+  luaD_inctop(L);
+  luaZ_initbuffer(L, &buff);
+  ls.buff = &buff;
+  luaX_setinput(L, &ls, &z, luaS_new(L, "inside chunk name"), zgetc((&z)));
+  luaX_next(&ls);  /* read first token */
+  L->top--;  /* remove scanner's table */
+
+  printf("Token: %d ", ls.t);
+  printf("%s\n", getstr(ls.t.seminfo.ts));
 
   return 0;
 }
