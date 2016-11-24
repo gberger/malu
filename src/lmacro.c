@@ -12,11 +12,13 @@
 
 #include "lua.h"
 
+#include "lauxlib.h"
 #include "lctype.h"
 #include "ldebug.h"
 #include "ldo.h"
 #include "llex.h"
 #include "lmacro.h"
+#include "lualib.h"
 
 #define lua_swap(L) lua_insert(L, -2)
 
@@ -42,6 +44,16 @@ static int get_next_char_lua_closure(lua_State *L) {
   lua_pushstring(ls->L, next_char);
 
   return 1;
+}
+
+
+static int get_next_token_lua_closure(lua_State *L) {
+  lua_State* new_state = luaL_newstate();
+  luaL_openlibs(new_state);
+  luaL_loadstring(new_state, "print('hello from inside new state')");
+  lua_pcall(new_state, 0, 0, 0);
+
+  return 0;
 }
 
 
@@ -144,8 +156,11 @@ void read_macro (LexState *ls) {
     lua_pushlightuserdata(ls->L, ls);
     lua_pushcclosure(ls->L, get_next_char_lua_closure, 1);
 
+    lua_pushcfunction(ls->L, get_next_token_lua_closure);
+
+
     /* call the macro with the closure as a parameter */
-    lua_call(ls->L, 1, 1);
+    lua_call(ls->L, 2, 1);
 
     /* if the function call returns a non-empty string,
        add it to the lex queue */

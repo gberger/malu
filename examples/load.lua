@@ -1,5 +1,3 @@
-dofile"examples/_utils.lua"
-
 function using(next)
     assert(load(next))()
     print('dentro')
