@@ -25,7 +25,7 @@
 #include "lzio.h"
 
 #define lua_swap(L) lua_insert(L, -2)
-
+#define lua_duplicate_top(L) lua_pushvalue(L, -1)
 
 /* This function will be closure-ed, receiving the LexState as an upvalue (in
  * a light userdata), and passed to any macro. The macro can call it to
@@ -35,6 +35,7 @@ static int get_next_char_lua_closure(lua_State *L) {
   char next_char[2] = {0, 0};
 
   next(ls);
+
   if (ls->current == EOZ) {
     (ls->z->n)++;
     return 0;
@@ -50,32 +51,31 @@ static int get_next_char_lua_closure(lua_State *L) {
   return 1;
 }
 
-typedef struct EmbeddedString {
-  const char *s;
-  size_t size;
-} EmbeddedString;
+static const char *get_from_next (lua_State *L, void *ud, size_t *size) {
+  UNUSED(L);
 
-static const char *getE (lua_State *L, void *ud, size_t *size) {
-  EmbeddedString *ls = (EmbeddedString *)ud;
-  (void)L;  /* not used */
-  if (ls->size == 0) return NULL;
-  *size = ls->size;
-  ls->size = 0;
-  return ls->s;
+  lua_State* LS = (lua_State *) ud;
+
+  lua_duplicate_top(LS);
+  lua_call(LS, 0, 1);
+
+  if (lua_isnil(LS, -1)) {
+    *size = 0;
+    return NULL;
+  }
+
+  const char *str = lua_tostring(LS, -1);
+  *size = strlen(str);
+  lua_pop(LS, 1);
+
+  return str;
 }
 
 
 static int get_next_token_lua_closure(lua_State *L) {
-  const char *str = "print('hello from inside new state')";
-
-  EmbeddedString es;
-  es.size = strlen(str);
-  es.s = str;
-
-  lua_Reader reader = getE;
-  void *data = &es;
-  const char *chunkname = "?";
-  const char *mode = NULL;
+  lua_Reader reader = get_from_next;
+  void *data = L;
+  const char *chunkname = "internal llex";
   lua_State* NS = luaL_newstate();
   Mbuffer buff;
 
@@ -86,18 +86,17 @@ static int get_next_token_lua_closure(lua_State *L) {
   z.n = 0;
   z.p = NULL;
 
-
   LexState ls;
   ls.h = luaH_new(NS);  /* create table for scanner */
   sethvalue(NS, NS->top, ls.h);  /* anchor it */
   luaD_inctop(NS);
   luaZ_initbuffer(NS, &buff);
   ls.buff = &buff;
-  luaX_setinput(NS, &ls, &z, luaS_new(NS, "inside chunk name"), zgetc((&z)));
+  luaX_setinput(NS, &ls, &z, luaS_new(NS, chunkname), zgetc((&z)));
   luaX_next(&ls);  /* read first token */
   NS->top--;  /* remove scanner's table */
 
-  printf("Token: %d ", ls.t);
+  printf("Token: %d ", ls.t.token);
   printf("%s\n", getstr(ls.t.seminfo.ts));
 
   return 0;

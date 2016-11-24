@@ -1,8 +1,8 @@
 function using(next, llex)
-    llex()
+    llex(next)
 end
 
 assert(load([[
 @using
-print('fora')
+xyz('fora')
 ]]))()
