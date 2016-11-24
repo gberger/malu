@@ -1,4 +1,4 @@
-function using(next, llex)
+function tokens(next, llex)
     print(llex(next))
     print(llex(next))
     print(llex(next))
@@ -9,6 +9,6 @@ function using(next, llex)
 end
 
 assert(load([[
-@using
+@tokens
 3.14 123 abc 'xyz' <= ! ~=
 ]]))()
