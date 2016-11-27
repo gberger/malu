@@ -20,6 +20,13 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
+#include "llex.h"
+#include "ltable.h"
+#include "ldo.h"
+#include "lstring.h"
+#include "ltable.h"
+#include "lzio.h"
+
 
 static int luaB_print (lua_State *L) {
   int n = lua_gettop(L);  /* number of arguments */
@@ -450,6 +457,76 @@ static int luaB_tostring (lua_State *L) {
 }
 
 
+/*
+** {======================================================
+** Generic Lexer function
+** =======================================================
+*/
+
+static const char *read_from_next(lua_State *L, void *ud, size_t *size) {
+  (void) ud;  // unused
+
+  lua_pushvalue(L, 1);
+  lua_call(L, 0, 1);
+
+  if (lua_isnil(L, -1)) {
+    *size = 0;
+    return NULL;
+  }
+
+  const char *str = lua_tostring(L, -1);
+  *size = strlen(str);
+  lua_pop(L, 1);
+
+  return str;
+}
+
+static void tokenpushpair(lua_State *L, Token t) {
+  if (t.token < FIRST_RESERVED) {
+    lua_pushfstring(L, "%c", t.token);
+    lua_pushfstring(L, "%c", t.token);
+  } else {
+    lua_pushstring(L, TOKEN_NAME(t.token));
+    if (t.token < TK_EOS) {
+      lua_pushstring(L, TOKEN_NAME(t.token));
+    } else if (t.token == TK_EOS) {
+      lua_pushnil(L);
+    } else if (t.token == TK_FLT) {
+      lua_pushnumber(L, t.seminfo.r);
+    } else if (t.token == TK_INT) {
+      lua_pushinteger(L, t.seminfo.i);
+    } else if (t.token == TK_NAME || t.token == TK_STRING) {
+      lua_pushstring(L, getstr(t.seminfo.ts));
+    }
+  }
+}
+
+static int luaB_llex(lua_State *L) {
+  lua_Reader reader = read_from_next;
+  const char *chunkname = "internal llex";
+  Mbuffer buff;
+
+  ZIO z;
+  luaZ_init(L, &z, reader, NULL);
+
+  LexState ls;
+  ls.h = luaH_new(L);  /* create table for scanner */
+  sethvalue(L, L->top, ls.h);  /* anchor it */
+  luaD_inctop(L);
+  luaZ_initbuffer(L, &buff);
+  ls.buff = &buff;
+  luaX_setinput(L, &ls, &z, luaS_new(L, chunkname), zgetc((&z)));
+  luaX_next(&ls);  /* read first token */
+  L->top--;  /* remove scanner's table */
+
+  tokenpushpair(L, ls.t);
+
+  return 2;
+}
+
+/* }====================================================== */
+
+
 static const luaL_Reg base_funcs[] = {
   {"assert", luaB_assert},
   {"collectgarbage", luaB_collectgarbage},
@@ -457,6 +534,7 @@ static const luaL_Reg base_funcs[] = {
   {"error", luaB_error},
   {"getmetatable", luaB_getmetatable},
   {"ipairs", luaB_ipairs},
+  {"llex", luaB_llex},
   {"loadfile", luaB_loadfile},
   {"load", luaB_load},
 #if defined(LUA_COMPAT_LOADSTRING)
