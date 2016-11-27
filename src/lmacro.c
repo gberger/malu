@@ -9,14 +9,11 @@
 #include "lprefix.h"
 
 #include <stdio.h>
-#include <string.h>
 
 #include "lua.h"
 
-#include "lauxlib.h"
 #include "lctype.h"
 #include "ldebug.h"
-#include "ldo.h"
 #include "llex.h"
 #include "lmacro.h"
 
@@ -147,7 +144,7 @@ void read_macro (LexState *ls) {
     /* create C closure with the LexState */
     lua_pushlightuserdata(ls->L, ls);
     lua_pushcclosure(ls->L, get_next_char_lua_closure, 1);
-    
+
     /* call the macro with the closure as a parameter */
     lua_call(ls->L, 1, 1);
 

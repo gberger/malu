@@ -27,7 +27,14 @@
 -- lbaselib.c: luaB_load
 
 
-----------
+----------------
+
+- remove extra lua state
+- _M table
+- llex is generic
+
+----------------
+
 
 - @define nome "print($1)"
 -
