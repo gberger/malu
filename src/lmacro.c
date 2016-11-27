@@ -51,21 +51,19 @@ static int get_next_char_lua_closure(lua_State *L) {
 }
 
 static const char *read_from_next(lua_State *L, void *ud, size_t *size) {
-  UNUSED(L);
+  UNUSED(ud);
 
-  lua_State* LS = (lua_State *) ud;
+  lua_pushvalue(L, 1);
+  lua_call(L, 0, 1);
 
-  lua_duplicate_top(LS);
-  lua_call(LS, 0, 1);
-
-  if (lua_isnil(LS, -1)) {
+  if (lua_isnil(L, -1)) {
     *size = 0;
     return NULL;
   }
 
-  const char *str = lua_tostring(LS, -1);
+  const char *str = lua_tostring(L, -1);
   *size = strlen(str);
-  lua_pop(LS, 1);
+  lua_pop(L, 1);
 
   return str;
 }
@@ -83,7 +81,7 @@ static void tokenpushpair(lua_State *L, Token t) {
     } else if (t.token == TK_FLT) {
       lua_pushnumber(L, t.seminfo.r);
     } else if (t.token == TK_INT) {
-      lua_pushnumber(L, t.seminfo.i);
+      lua_pushinteger(L, t.seminfo.i);
     } else if (t.token == TK_NAME || t.token == TK_STRING) {
       lua_pushstring(L, getstr(t.seminfo.ts));
     }
@@ -92,27 +90,21 @@ static void tokenpushpair(lua_State *L, Token t) {
 
 static int get_next_token_lua_closure(lua_State *L) {
   lua_Reader reader = read_from_next;
-  void *data = L;
   const char *chunkname = "internal llex";
-  lua_State* NS = luaL_newstate();
   Mbuffer buff;
 
   ZIO z;
-  z.L = NS;
-  z.reader = reader;
-  z.data = data;
-  z.n = 0;
-  z.p = NULL;
+  luaZ_init(L, &z, reader, NULL);
 
   LexState ls;
-  ls.h = luaH_new(NS);  /* create table for scanner */
-  sethvalue(NS, NS->top, ls.h);  /* anchor it */
-  luaD_inctop(NS);
-  luaZ_initbuffer(NS, &buff);
+  ls.h = luaH_new(L);  /* create table for scanner */
+  sethvalue(L, L->top, ls.h);  /* anchor it */
+  luaD_inctop(L);
+  luaZ_initbuffer(L, &buff);
   ls.buff = &buff;
-  luaX_setinput(NS, &ls, &z, luaS_new(NS, chunkname), zgetc((&z)));
+  luaX_setinput(L, &ls, &z, luaS_new(L, chunkname), zgetc((&z)));
   luaX_next(&ls);  /* read first token */
-  NS->top--;  /* remove scanner's table */
+  L->top--;  /* remove scanner's table */
 
   tokenpushpair(L, ls.t);
 

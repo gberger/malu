@@ -25,3 +25,9 @@
 -- lexstate, seminfo, zio novo
 -- lapi.c: lua_load
 -- lbaselib.c: luaB_load
+
+
+----------
+
+- @define nome "print($1)"
+-

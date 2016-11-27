@@ -10,5 +10,6 @@ end
 
 assert(load([[
 @tokens
-3.14 123 abc 'xyz' <= ! ~=
+3.14 123 abc  --[=[comment]=] 'xyz\n\x46' <= ! ~=
+print('fim')
 ]]))()
