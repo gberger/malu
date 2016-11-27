@@ -1,4 +1,4 @@
-function using(next)
+_M.using = function(next)
     assert(load(next))()
     print('dentro')
 

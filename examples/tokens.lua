@@ -1,4 +1,4 @@
-function tokens(next, llex)
+_M.tokens = function(next, llex)
     print(llex(next))
     print(llex(next))
     print(llex(next))

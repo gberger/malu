@@ -1,6 +1,6 @@
 dofile"examples/_utils.lua"
 
-function reverse(next)
+_M.reverse = function(next)
     next() -- skip opening parenthesis
 
     local name = next_while_match(next, '[_%w]')

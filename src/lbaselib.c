@@ -479,6 +479,7 @@ static const luaL_Reg base_funcs[] = {
   /* placeholders */
   {"_G", NULL},
   {"_VERSION", NULL},
+  {"_M", NULL},
   {NULL, NULL}
 };
 
@@ -493,6 +494,9 @@ LUAMOD_API int luaopen_base (lua_State *L) {
   /* set global _VERSION */
   lua_pushliteral(L, LUA_VERSION);
   lua_setfield(L, -2, "_VERSION");
+  /* set global _M */
+  lua_newtable(L);
+  lua_setfield(L, -2, "_M");
   return 1;
 }
 

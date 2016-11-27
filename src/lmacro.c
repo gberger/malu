@@ -24,7 +24,6 @@
 #include "lzio.h"
 
 #define lua_swap(L) lua_insert(L, -2)
-#define lua_duplicate_top(L) lua_pushvalue(L, -1)
 
 /* This function will be closure-ed, receiving the LexState as an upvalue (in
  * a light userdata), and passed to any macro. The macro can call it to
@@ -199,8 +198,10 @@ void read_macro (LexState *ls) {
     luaZ_resetbuffer(ls->buff);
 
 
-    /* get global function from macro name */
-    lua_getglobal(ls->L, getstr(ts));
+    /* get function from _G._M[macro_name] */
+    lua_getglobal(ls->L, "_M");
+    lua_getfield(ls->L, -1, getstr(ts));
+    lua_remove(ls->L, -2);
 
     if (!lua_isfunction(ls->L, -1)) {
       lua_pop(ls->L, 1);

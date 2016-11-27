@@ -1,6 +1,6 @@
 dofile"examples/_utils.lua"
 
-function T(next)
+_M.T = function(next)
     next() -- skip opening curly braces
 
     local body = next_until(next, '}')

@@ -1,8 +1,8 @@
-function inner(next)
+_M.inner = function(next)
     return 'abc'
 end
 
-function outer(next)
+_M.outer = function(next)
     return "@inner"
 end
 

@@ -1,4 +1,4 @@
-function abc(next)
+_M.abc = function(next)
     return ''
 end
 

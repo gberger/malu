@@ -1,6 +1,6 @@
 dofile"examples/_utils.lua"
 
-function using(next)
+_M.using = function(next)
     next() -- skip opening parenthesis
 
     local name = next_until(next, ')')
