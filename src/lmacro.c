@@ -26,7 +26,7 @@ static int get_next_char_lua_closure(lua_State *L) {
   LexState *ls = lua_touserdata(L, lua_upvalueindex(1));
   char next_char[2] = {0, 0};
 
-  next(ls);
+//  printf("current: %c\n", ls->current);
 
   if (ls->current == EOZ) {
     (ls->z->n)++;
@@ -39,6 +39,8 @@ static int get_next_char_lua_closure(lua_State *L) {
 
   next_char[0] = cast(char, ls->current);
   lua_pushstring(ls->L, next_char);
+
+  next(ls);
 
   return 1;
 }
@@ -81,36 +83,10 @@ void macro_next (LexState *ls) {
   }
 }
 
-char macro_look_next(LexState *ls) {
-  size_t t_len;
-  char const* str;
-  lua_Integer str_index;
-  size_t str_len;
-
-  t_len = lua_rawlen(ls->L, ls->msti);
-  lua_geti(ls->L, ls->msti, cast(lua_Integer, t_len));
-  str = lua_tolstring(ls->L, -1, &str_len);
-  lua_pop(ls->L, 1);
-  str_index = ls->msi[t_len - 1];
-
-  return str[str_index];
-}
-
-char look_next(LexState *ls) {
-  char c;
-
-  if (has_active_macros(ls)) {
-    c = macro_look_next(ls);
-  } else {
-    c = cast(char, zgetc(ls->z));
-    ls->z->n++;
-    ls->z->p--;
-  }
-
-  return c;
-}
 
 void read_macro (LexState *ls) {
+  char next_char[2] = {0, 0};
+
   next(ls);
 
   /* macro name is `[A-Za-z][A-Za-z0-0]*` */
@@ -118,12 +94,9 @@ void read_macro (LexState *ls) {
     lexerror(ls, "invalid macro", '@');
   } else {
     /* populate ls->buff until we run out of alphanum */
-    while(1) {
-      save(ls, ls->current);
-      if (!lislalnum(look_next(ls)))
-        break;
-      next(ls);
-    };
+    do {
+      save_and_next(ls);
+    } while (lislalnum(ls->current));
 
     /* create string from the buffer */
     TString *ts = luaX_newstring(ls, luaZ_buffer(ls->buff),
@@ -158,15 +131,20 @@ void read_macro (LexState *ls) {
         ls->msti = lua_gettop(ls->L) - 1;
       }
 
+      /* macro_str = macro_str .. ls->current */
+      next_char[0] = cast(char, ls->current);
+      lua_pushstring(ls->L, next_char);
+      lua_concat(ls->L, 2);
+
       /* push the macro_str to the end of the macro_table, initialize msi */
       lua_seti(ls->L, ls->msti,
                cast(lua_Integer, lua_rawlen(ls->L, ls->msti)) + 1);
       ls->msi[lua_rawlen(ls->L, ls->msti) - 1] = 0;
+
+      next(ls);
     } else {
       /* discard the return */
       lua_pop(ls->L, 1);
     }
-
-    next(ls);
   }
 }
