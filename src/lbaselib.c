@@ -467,7 +467,7 @@ static int luaB_tostring (lua_State *L) {
 ** Used as the lua_Reader function for the 'llex' function.
 */
 static const char *read_from_next(lua_State *L, void *ud, size_t *size) {
-  (void) ud;  // unused
+  (void) ud;  /* unused */
 
   /* the first argument to luaB_llex, should be a `next` function */
   lua_pushvalue(L, 1);
@@ -479,7 +479,7 @@ static const char *read_from_next(lua_State *L, void *ud, size_t *size) {
     return NULL;
   }
 
-  /* the return of `next` is the result of the reader *//
+  /* the return of `next` is the result of the reader */
   const char *str = lua_tostring(L, -1);
   lua_pop(L, 1);
 
