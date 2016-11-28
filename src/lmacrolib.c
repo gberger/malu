@@ -25,6 +25,8 @@
 #include "ltable.h"
 #include "lzio.h"
 
+#define lua_append(L,t) lua_seti(L,t, cast(lua_Integer, lua_rawlen(L, t)) + 1)
+#define lua_swap(L) lua_insert(L, -2)
 
 /*
 ** {======================================================
@@ -128,8 +130,123 @@ static int luaB_llex(lua_State *L) {
 /* }====================================================== */
 
 
+
+/*
+** {======================================================
+** @macro
+** =======================================================
+*/
+
+static int macro_closure(lua_State *L) {
+  lua_pushvalue(L, lua_upvalueindex(1));
+  lua_pushvalue(L, 1);
+  lua_call(L, 1, 1);
+
+  return 1;
+}
+
+static int luaB_macro(lua_State *L) {
+  int macro_body;
+  const char *token, *value, *macro_name;
+
+  /* macro_body = {"local next = ..."} */
+  lua_newtable(L);
+  macro_body = lua_gettop(L);
+  lua_pushstring(L, "local next = ...");
+  lua_append(L, macro_body);
+
+  /* token, value = llex(next) */
+  lua_getglobal(L, "_M");
+  lua_getfield(L, -1, "llex");
+  lua_pushvalue(L, 1);  /* next */
+  lua_call(L, 1, 2);  /* llex(next) */
+
+  /* macro_name = value */
+  macro_name = lua_tostring(L, -1);
+  lua_pop(L, 1);
+
+  /* assert(token == '<name>') */
+  token = lua_tostring(L, -1);
+  lua_pop(L, 1);
+  lua_getglobal(L, "assert");
+  lua_pushboolean(L, strcmp(token, "<name>") == 0);
+  lua_call(L, 1, 0);
+
+  /* token, value = llex(next) */
+  lua_getglobal(L, "_M");
+  lua_getfield(L, -1, "llex");
+  lua_pushvalue(L, 1);  /* next */
+  lua_call(L, 1, 2);  /* llex(next) */
+  value = lua_tostring(L, -1);
+  token = lua_tostring(L, -2);
+  lua_pop(L, 2);
+
+  /* while not (token == '<name>' and value == 'endmacro') do */
+  while(!(strcmp(token, "<name>") == 0 && strcmp(value, "endmacro") == 0)) {
+    /* if token == '<string>' then */
+    if (strcmp(token, "<string>") == 0) {
+      /* macro_body[#macro_body+1] = "'" .. value .. "'" */
+      lua_pushfstring(L, "'%s'", value);
+      lua_append(L, macro_body);
+    } else {
+      /* macro_body[#macro_body+1] = value */
+      lua_pushstring(L, value);
+      lua_append(L, macro_body);
+    }
+
+    /* token, value = llex(next) */
+    lua_getglobal(L, "_M");
+    lua_getfield(L, -1, "llex");
+    lua_pushvalue(L, 1);  /* next */
+    lua_call(L, 1, 2);  /* llex(next) */
+    value = lua_tostring(L, -1);
+    token = lua_tostring(L, -2);
+    lua_pop(L, 3);
+  }
+
+
+  /* local fn, e = load(table.concat(macro_body, ' ')) */
+  lua_getglobal(L, "table");
+  lua_getfield(L, -1, "concat");
+  lua_pushvalue(L, macro_body);
+  lua_pushstring(L, " ");
+  lua_call(L, 2, 1);
+
+  lua_getglobal(L, "load");
+  lua_swap(L);
+  lua_call(L, 1, 2);
+
+  /* if e then */
+  if (!lua_isnil(L, -1)) {
+    /* throw e */
+    lua_error(L);
+    return 0;
+  } else {
+    /* discard e */
+    lua_pop(L, 1);
+  }
+
+  /* _M[macro_name] = fn */
+  lua_pushcclosure(L, macro_closure, 1);
+
+  lua_getglobal(L, "_M");
+  lua_swap(L);
+  lua_setfield(L, -2, macro_name);
+
+  lua_getglobal(L, "_M");
+  lua_getfield(L, -1, "dumb");
+
+  lua_pushnil(L);
+  return 1;
+}
+
+/* }====================================================== */
+
+
+
 static const luaL_Reg macro_funcs[] = {
     {"llex", luaB_llex},
+    {"macro", luaB_macro},
     {NULL, NULL}
 };
 
