@@ -35,7 +35,7 @@ _M.define = function(next)
             end
 
             assert(brackets >= 0, 'unexpected brackets mismatch')
-            assert(braces >= 0, 'unexpected braces mismatch')
+            assert(braces >= 0, 'unexpected brackets mismatch')
 
             if t == ',' then
                 if parens == 0 and brackets == 0 and braces == 0 then
@@ -69,5 +69,5 @@ assert(load([[
 function add(a, b)
     return a + b
 end
-print(@mult( add ( 1 , 1 ) , 2 , 3 ) )
+print(@mult(add(1, 1), 2, 3))
 ]]))()

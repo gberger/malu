@@ -34,7 +34,11 @@
 
 
 void next(LexState *ls) {
-  if (has_active_macros(ls)) {
+  if (ls->hold != -1) {
+    /* fix for llex function being too greedy */
+    ls->current = ls->hold;
+    ls->hold = -1;
+  } else if (has_active_macros(ls)) {
     macro_next(ls);
   } else {
     /* classic next */

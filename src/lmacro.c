@@ -28,6 +28,18 @@ static int get_next_char_lua_closure(lua_State *L) {
   LexState *ls = lua_touserdata(L, lua_upvalueindex(1));
   char next_char[2] = {0, 0};
 
+  /* if called with a char, use it as current and hold the current! */
+  if (lua_gettop(L) > 0) {
+    lua_assert(strlen(str) > 0);
+    const char *str = lua_tostring(L, 1);
+
+    ls->hold = ls->current;
+    ls->current = str[0];
+
+    return 0;
+  }
+
+
   if (ls->current == EOZ) {
     return 0;
   }

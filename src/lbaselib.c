@@ -530,11 +530,13 @@ static int luaB_llex(lua_State *L) {
   lua_Reader reader = read_from_next;
   const char *chunkname = "internal llex";
   Mbuffer buff;
+  char pending[2] = {0,0};
 
   ZIO z;
   luaZ_init(L, &z, reader, NULL);
 
   LexState ls;
+  ls.hold = -1;
   ls.h = luaH_new(L);  /* create table for scanner */
   sethvalue(L, L->top, ls.h);  /* anchor it */
   luaD_inctop(L);
@@ -544,7 +546,12 @@ static int luaB_llex(lua_State *L) {
   luaX_next(&ls);  /* read one token */
   L->top--;  /* remove scanner's table */
 
+  pending[0] = ls.current;
+  lua_pushstring(L, pending);
+  lua_call(L, 1, 0);
+
   tokenpushpair(L, ls.t);
+
 
   return 2;
 }
