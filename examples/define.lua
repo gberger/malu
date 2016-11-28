@@ -13,7 +13,7 @@ _M.define = function(next)
         local current = ''
         local t, v
         t, v = llex(next)
-        assert(t == '(')
+        assert(t == '(', 'unexpected token ' .. t .. ', call this macro like @' .. macro_name .. '(arg1, ...)')
 
         t, v = llex(next)
         while true do
@@ -33,6 +33,9 @@ _M.define = function(next)
             elseif t == '}' then
                 braces = braces - 1
             end
+
+            assert(brackets >= 0, 'unexpected brackets mismatch')
+            assert(braces >= 0, 'unexpected braces mismatch')
 
             if t == ',' then
                 if parens == 0 and brackets == 0 and braces == 0 then
