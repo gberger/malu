@@ -6,11 +6,9 @@ _M.define = function(next)
     assert(token == '<string>')
 
     _M[macro_name] = function(next)
-        local stack = {
-            parens = 0,
-            brackets = 0,
-            braces = 0
-        }
+        local parens = 0
+        local brackets = 0
+        local braces = 0
         local args = {}
         local current = ''
         local t, v
@@ -20,28 +18,24 @@ _M.define = function(next)
         t, v = llex(next)
         while true do
             if t == '(' then
-                stack.parens = stack.parens + 1
-                current = current .. v
+                parens = parens + 1
             elseif t == ')' then
-                stack.parens = stack.parens - 1
-                if stack.parens == -1 then
+                parens = parens - 1
+                if parens == -1 then
                     break
                 end
-                current = current .. v
             elseif t == '[' then
-                stack.brackets = stack.brackets + 1
-                current = current .. v
+                brackets = brackets + 1
             elseif t == ']' then
-                stack.brackets = stack.brackets - 1
-                current = current .. v
+                brackets = brackets - 1
             elseif t == '{' then
-                stack.braces = stack.braces + 1
-                current = current .. v
+                braces = braces + 1
             elseif t == '}' then
-                stack.braces = stack.braces - 1
-                current = current .. v
-            elseif t == ',' then
-                if stack.parens == 0 and stack.brackets == 0 and stack.braces == 0 then
+                braces = braces - 1
+            end
+
+            if t == ',' then
+                if parens == 0 and brackets == 0 and braces == 0 then
                     args[#args+1] = current
                     current = ''
                 else
