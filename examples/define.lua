@@ -65,9 +65,12 @@ _M.define = function(next)
 end
 
 assert(load([[
-@define mult '(($1) * ($2) * ($3))'
+t = {value = 1}
+
 function add(a, b)
     return a + b
 end
-print(@mult(add(1, 1), 2, 3))
+
+@define mult '(($1) * ($2) * ($3))'
+print(@mult(add(t.value, t['value']), 2, 3))
 ]]))()
