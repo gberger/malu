@@ -41,6 +41,7 @@
 */
 static const luaL_Reg loadedlibs[] = {
   {"_G", luaopen_base},
+  {LUA_MACROLIBNAME, luaopen_macro},
   {LUA_LOADLIBNAME, luaopen_package},
   {LUA_COLIBNAME, luaopen_coroutine},
   {LUA_TABLIBNAME, luaopen_table},
