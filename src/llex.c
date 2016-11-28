@@ -34,7 +34,6 @@
 
 
 void next(LexState *ls) {
-  /* if we have a macro string table, and it's not empty */
   if (has_active_macros(ls)) {
     macro_next(ls);
   } else {

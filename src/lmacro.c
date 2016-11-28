@@ -19,17 +19,16 @@
 
 #define lua_swap(L) lua_insert(L, -2)
 
-/* This function will be closure-ed, receiving the LexState as an upvalue (in
- * a light userdata), and passed to any macro. The macro can call it to
- * obtain the next char. */
+/*
+** This function will be closure-ed, receiving the LexState as an upvalue (in
+** a light userdata), and passed to any macro. The macro can call it to
+** obtain the next char.
+*/
 static int get_next_char_lua_closure(lua_State *L) {
   LexState *ls = lua_touserdata(L, lua_upvalueindex(1));
   char next_char[2] = {0, 0};
 
-//  printf("current: %c\n", ls->current);
-
   if (ls->current == EOZ) {
-    (ls->z->n)++;
     return 0;
   }
 
@@ -41,17 +40,24 @@ static int get_next_char_lua_closure(lua_State *L) {
   lua_pushstring(ls->L, next_char);
 
   next(ls);
+  if (ls->current == EOZ) {
+    (ls->z->n)++;
+  }
 
   return 1;
 }
 
-
+/*
+** updates ls->current by reading a character from the macro string
+** at the top of the macro strings table (stack).
+*/
 void macro_next (LexState *ls) {
   size_t t_len;
   char const* str;
   lua_Integer str_index;
   size_t str_len;
 
+  /* length of the macro string table, guaranteed to be >0 */
   t_len = lua_rawlen(ls->L, ls->msti);
 
   /* put the last string at the top of the stack */
@@ -66,12 +72,11 @@ void macro_next (LexState *ls) {
 
   /* store the char at that index, also increment the index */
   ls->current = str[str_index];
+  ls->msi[t_len - 1] = cast(int, str_index + 1);
 
-  str_index++;
-  ls->msi[t_len - 1] = cast(int, str_index);
-
+  /* verify if we reached the end of the string */
   if (ls->msi[t_len - 1] == (long long) str_len) {
-    /* reached the end of the string, remove it from the table */
+    /* remove it from the table */
     lua_pushnil(ls->L);
     lua_seti(ls->L, ls->msti, cast(lua_Integer, t_len));
 
@@ -83,7 +88,11 @@ void macro_next (LexState *ls) {
   }
 }
 
-
+/*
+** called during llex, when ls->current == '@'
+** reads a macro's name, calls it, and store its result in the
+** macro strings table
+*/
 void read_macro (LexState *ls) {
   char next_char[2] = {0, 0};
 
