@@ -1,3 +1,5 @@
+@loadfile "examples/_def_define.lua"
+
 t = {value = 1}
 
 function add(a, b)

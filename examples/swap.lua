@@ -1,3 +1,6 @@
+@loadfile "examples/_def_define.lua"
+
+
 @define swap '$1, $2 = $2, $1'
 
 a = 1

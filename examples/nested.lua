@@ -1,3 +1,5 @@
+@loadfile "examples/_def_macro.lua"
+
 @macro inner
     return 'abc'
 endmacro

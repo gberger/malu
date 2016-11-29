@@ -1,3 +1,5 @@
+@loadfile "examples/_def_define.lua"
+
 @define reduce [[
     (function()
         local res = $2
@@ -13,6 +15,8 @@
 
 local t = {1, 5, 10}
 
-print(@reduce(t, 100, /))
-print(@sum(t))
---print(@mul(t))
+print( @reduce(t, 100, /) )
+
+print( @sum(t) )
+
+print( @mul(t) )

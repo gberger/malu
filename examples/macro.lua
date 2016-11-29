@@ -1,6 +1,8 @@
+@loadfile "examples/_def_macro.lua"
+
 print('Hello Lua.')
 
-@macro dumb
+@macro   dumb
     if 1 == 1 then
         return "print(\"Things are okay.\")"
     else

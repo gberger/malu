@@ -1,3 +1,6 @@
+@loadfile "examples/_def_macro.lua"
+
+
 @macro tokens
     print(macros.llex(next))
     print(macros.llex(next))
