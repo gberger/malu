@@ -7,8 +7,8 @@ macros.define = function(next)
     local token, macro_body = macros.llex(next)
     assert(token == '<string>')
 
-    macros[macro_name] = function(next)
-        local args = macros.argparse(next)
+    macros[macro_name] = function(nnext)
+        local args = macros.argparse(nnext)
 
         local result = macro_body
         for i, arg in ipairs(args) do

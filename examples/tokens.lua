@@ -14,5 +14,5 @@
 endmacro
 
 @tokens
-3.14 123 abc.xyz  --[=[comment]=] 'xyz\n\x46' <= ! ~=
+3.14 123 abc.xyz  --[=[comment]=] "str \n" <= ! ~=
 print('END!')
