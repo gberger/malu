@@ -197,7 +197,7 @@ static int malu_argparse(lua_State *L) {
     } else if (strcmp(token, "{") == 0) {
       braces++;
     } else if (strcmp(token, "}") == 0) {
-      braces++;
+      braces--;
     }
 
     /*
