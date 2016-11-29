@@ -1,0 +1,3 @@
+-- local add = @lambda (x, y) x + y end
+-- becomes:
+-- local add = function(x, y) return x + y end

@@ -117,12 +117,15 @@ static int malu_llex(lua_State *L) {
   luaX_next(&ls);  /* read one token */
   L->top--;  /* remove scanner's table */
 
+  if (ls.t.token == TK_EOS) {
+    return 0;
+  }
+
   pending[0] = ls.current;
   lua_pushstring(L, pending);
   lua_call(L, 1, 0);
 
   tokenpushpair(L, ls.t);
-
 
   return 2;
 }

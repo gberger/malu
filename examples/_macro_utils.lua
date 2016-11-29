@@ -137,3 +137,16 @@ macros.readblock = function(next)
 
     return body
 end
+
+macros.token_filter = function(next, filter)
+    local t, v
+    local output = ''
+
+    t, v = macros.llex(next)
+    repeat
+        output = output .. ' ' .. macros.output_token(filter(t, v))
+        t, v = macros.llex(next)
+    until t == nil
+
+    return output
+end
