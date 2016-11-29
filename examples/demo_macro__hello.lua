@@ -2,7 +2,7 @@
 
 print('Hello Lua.')
 
-@macro dumb do
+@macro hello do
     print("I have a next function: ", next)
 
     if 1 == 1 then
@@ -16,4 +16,4 @@ print('Hello Lua.')
     end
 end
 
-@dumb
+@hello
