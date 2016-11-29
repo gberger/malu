@@ -33,6 +33,7 @@ macros.argparse = function(next)
     local parens = 0
     local brackets = 0
     local braces = 0
+    local functions = 0
     local args = {}
     local current = ''
     local t, v
@@ -57,7 +58,7 @@ macros.argparse = function(next)
                 braces = braces - 1
             end
 
-            args[1] = args[1] .. output_token(t, v)
+            args[1] = args[1] .. macros.output_token(t, v)
 
             if braces == -1 then
                 break
@@ -85,16 +86,20 @@ macros.argparse = function(next)
                 braces = braces + 1
             elseif t == '}' then
                 braces = braces - 1
+            elseif t == 'function' then
+                functions = functions + 1
+            elseif t == 'end' then
+                functions = functions - 1
             end
 
             assert(brackets >= 0, 'unexpected brackets mismatch')
             assert(braces >= 0, 'unexpected brackets mismatch')
 
-            if t == ',' and parens == 0 and brackets == 0 and braces == 0 then
+            if t == ',' and parens == 0 and brackets == 0 and braces == 0 and functions == 0 then
                 args[#args+1] = current
                 current = ''
             else
-                current = current .. output_token(t, v)
+                current = current .. ' ' .. macros.output_token(t, v)
             end
 
             t, v = macros.llex(next)
