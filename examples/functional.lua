@@ -15,4 +15,4 @@ local t = {1, 5, 10}
 
 print(@reduce(t, 100, /))
 print(@sum(t))
-print(@mul(t))
+--print(@mul(t))
