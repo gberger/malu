@@ -1,5 +1,18 @@
-@loadfile "examples/_def_demo_argparse.lua"
+@loadfile "examples/_def_macro.lua"
 
+
+@macro demo_argparse do
+   print('Parsing args...')
+
+   local args = macros.argparse(next)
+
+   print('Printing args:')
+   for i, arg in ipairs(args) do
+       print(i, arg)
+   end
+
+   print()
+end
 
 @demo_argparse(
     abc.xyz,
