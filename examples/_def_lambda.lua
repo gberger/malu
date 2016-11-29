@@ -32,12 +32,11 @@ macros.enable_lambdas = function(next)
             param_names[#param_names+1] = v
             state = 3
         elseif state == 3 then
+            assert(t == ',' or t == '-', 'expected comma `,` or minus `-` token in lambda params list')
             if t == ',' then
                 state = 2
             elseif t == '-' then
                 state = 4
-            else
-                assert(false, 'expected comma `,` or minus `-` token in lambda params list')
             end
         elseif state == 4 then
             assert(t == '>', 'expected gt `>` token after lambda arrow')
