@@ -37,7 +37,7 @@ macros.argparse = function(next)
     local braces = 0
     local blocks = 0
     local args = {}
-    local current = ''
+    local current = {}
     local t, v
 
     -- first token
@@ -46,7 +46,7 @@ macros.argparse = function(next)
     if t == '<string>' then
         -- fn "str"
         -- one string argument
-        args[1] = "'" .. v .. "'"
+        args[1] = macros.output_token(t, v)
     elseif t == '{' then
         -- fn {a=1, b=2}
         -- one table argument
@@ -99,16 +99,16 @@ macros.argparse = function(next)
             assert(blocks >= 0, 'unexpected function/if/do/end blocks mismatch')
 
             if t == ',' and parens == 0 and brackets == 0 and braces == 0 and blocks == 0 then
-                args[#args+1] = current
-                current = ''
+                args[#args+1] = table.concat(current, ' ')
+                current = {}
             else
-                current = current .. ' ' .. macros.output_token(t, v)
+                current[#current+1] = macros.output_token(t, v)
             end
 
             t, v = macros.llex(next)
         end
-        if current ~= '' then
-            args[#args+1] = current
+        if #current > 0 then
+            args[#args+1] = table.concat(current, ' ')
         end
     else
         print('bad args')
@@ -120,7 +120,7 @@ end
 macros.readblock = function(next)
     local t, v
     local stack = 1
-    local body = 'do'
+    local body = {'do'}
 
     -- first token
     t, v = macros.llex(next)
@@ -134,21 +134,21 @@ macros.readblock = function(next)
             stack = stack - 1
         end
 
-        body = body .. ' ' .. macros.output_token(t, v)
+        body[#body+1] = macros.output_token(t, v)
     until stack == 0
 
-    return body
+    return table.concat(body, ' ')
 end
 
 macros.token_filter = function(next, filter)
     local t, v
-    local output = ''
+    local output = {}
 
     t, v = macros.llex(next)
     repeat
-        output = output .. ' ' .. macros.output_token(filter(t, v))
+        output[#output+1] = macros.output_token(filter(t, v))
         t, v = macros.llex(next)
     until t == nil
 
-    return output
+    return table.concat(output, ' ')
 end

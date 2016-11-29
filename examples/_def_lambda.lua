@@ -4,42 +4,49 @@
 -- becomes:
 -- local add = function(x, y) return x + y end
 macros.enable_lambdas = function(next)
-    local state = 'waiting'
+    local state = 1
     local param_names = {}
     local parens_stack = 0
-    local body = ''
+    local body = {}
 
     return macros.token_filter(next, function(t, v)
-        print(t, v)
-        if state == 'waiting' then
+        -- states:
+        -- 1 = waiting
+        -- 2 = param name
+        -- 3 = param comma or `-`
+        -- 4 = arrow `>`
+        -- 5 = open body parens
+        -- 6 = body
+
+        if state == 1 then
             if t == '\\' then
                 param_names = {}
-                body = ''
+                body = {}
                 parens_stack = 0
-                state = 'params'
+                state = 2
             else
                 return t, v
             end
-        elseif state == 'params' then
+        elseif state == 2 then
             assert(t == '<name>', 'expected name token in lambda params list')
             param_names[#param_names+1] = v
-            state = 'param_comma'
-        elseif state == 'param_comma' then
+            state = 3
+        elseif state == 3 then
             if t == ',' then
-                state = 'params'
+                state = 2
             elseif t == '-' then
-                state = 'arrow'
+                state = 4
             else
                 assert(false, 'expected comma `,` or minus `-` token in lambda params list')
             end
-        elseif state == 'arrow' then
+        elseif state == 4 then
             assert(t == '>', 'expected gt `>` token after lambda arrow')
-            state = 'open_parens'
-        elseif state == 'open_parens' then
+            state = 5
+        elseif state == 5 then
             assert(t == '(', 'expected open parens `(` token after lambda arrow')
             parens_stack = 1
-            state = 'body'
-        elseif state == 'body' then
+            state = 6
+        elseif state == 6 then
             if t == '(' then
                 parens_stack = parens_stack + 1
             elseif t == ')' then
@@ -47,12 +54,12 @@ macros.enable_lambdas = function(next)
             end
 
             if parens_stack > 0 then
-                body = body .. ' ' .. macros.output_token(t, v)
+                body[#body+1] = macros.output_token(t, v)
             else
-                state = 'waiting'
-               return '<lambda>',
+                state = 1
+                return '<lambda>',
                     'function (' .. table.concat(param_names, ',')
-                            .. ') return ' .. body .. ' end'
+                            .. ') return ' .. table.concat(body, ' ') .. ' end'
             end
         end
     end)
