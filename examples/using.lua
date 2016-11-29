@@ -1,9 +1,9 @@
 @macro using
     local token, value, name
 
-    token, value = _M.llex(next)  -- skip opening parens
-    token, name = _M.llex(next)   -- argument
-    token, value = _M.llex(next)  -- skip closing parens
+    token, value = _M.llex(next)
+    token, name = _M.llex(next)
+    token, value = _M.llex(next)
 
     local tbl = _G[name]
     local str = ''
@@ -16,4 +16,5 @@
 endmacro
 
 @using(math)
+
 print(sin(5))

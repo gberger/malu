@@ -31,6 +31,7 @@ static int get_next_char_lua_closure(lua_State *L) {
   /* if called with a char, use it as current and hold the current! */
   if (lua_gettop(L) > 0) {
     lua_assert(strlen(str) > 0);
+    lua_assert(ls->hold == -1);
     const char *str = lua_tostring(L, 1);
 
     ls->hold = ls->current;

@@ -1,9 +1,10 @@
-dofile"examples/_utils.lua"
-
 _M.using = function(next)
-    next() -- skip opening parenthesis
+    local token, value, name
 
-    local name = next_until(next, ')')
+    token, value = _M.llex(next)
+    token, name = _M.llex(next)
+    token, value = _M.llex(next)
+
     local tbl = _G[name]
     local str = ''
 
@@ -16,5 +17,6 @@ end
 
 load([[
 @using(math)
+
 print(sin(5))
 ]])()
