@@ -5,5 +5,5 @@
     end
 endmacro
 
-@m(1, abc.xyz, fn(t['5']), (function(x) return x*2 end)(5), {1,'oi([{)]}',3}, print(5))
+@m(1, abc.xyz, fn(t['5']), (function(x) return x*2 end)(5), {1,'oi([{)]}',3}, print(5), +, $1)
 print('end')
