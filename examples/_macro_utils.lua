@@ -50,7 +50,7 @@ macros.argparse = function(next)
     elseif t == '{' then
         -- fn {a=1, b=2}
         -- one table argument
-        args[1] = '{'
+        current = { '{' }
 
         t, v = macros.llex(next)
         while true do
@@ -60,13 +60,15 @@ macros.argparse = function(next)
                 braces = braces - 1
             end
 
-            args[1] = args[1] .. macros.output_token(t, v)
+            current[#current+1] = macros.output_token(t, v)
 
             if braces == -1 then
                 break
             end
             t, v = macros.llex(next)
         end
+
+        args[#args+1] = table.concat(current, ' ')
     elseif t == '(' then
         -- fn(a, t.xyz, 5)
         -- full arguments list
