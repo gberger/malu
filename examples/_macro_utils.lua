@@ -33,7 +33,7 @@ macros.argparse = function(next)
     local parens = 0
     local brackets = 0
     local braces = 0
-    local functions = 0
+    local blocks = 0
     local args = {}
     local current = ''
     local t, v
@@ -86,16 +86,17 @@ macros.argparse = function(next)
                 braces = braces + 1
             elseif t == '}' then
                 braces = braces - 1
-            elseif t == 'function' then
-                functions = functions + 1
+            elseif t == 'function' or t == 'if' or t == 'do' then
+                blocks = blocks + 1
             elseif t == 'end' then
-                functions = functions - 1
+                blocks = blocks - 1
             end
 
             assert(brackets >= 0, 'unexpected brackets mismatch')
             assert(braces >= 0, 'unexpected brackets mismatch')
+            assert(blocks >= 0, 'unexpected function/if/do/end blocks mismatch')
 
-            if t == ',' and parens == 0 and brackets == 0 and braces == 0 and functions == 0 then
+            if t == ',' and parens == 0 and brackets == 0 and braces == 0 and blocks == 0 then
                 args[#args+1] = current
                 current = ''
             else
@@ -112,4 +113,27 @@ macros.argparse = function(next)
     end
 
     return args
+end
+
+macros.readblock = function(next)
+    local t, v
+    local stack = 1
+    local body = 'do'
+
+    -- first token
+    t, v = macros.llex(next)
+    assert(t == 'do', 'expected "do"')
+
+    repeat
+        t, v = macros.llex(next)
+        if t == 'function' or t == 'if' or t == 'do' then
+            stack = stack + 1
+        elseif t == 'end' then
+            stack = stack - 1
+        end
+
+        body = body .. ' ' .. macros.output_token(t, v)
+    until stack == 0
+
+    return body
 end
