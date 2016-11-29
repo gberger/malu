@@ -22,7 +22,9 @@ macros.unescape_string = function(str)
 end
 
 macros.output_token = function(token, value)
-    if token == '<string>' then
+    if token == nil or token == '<eof>' then
+        return ''
+    elseif token == '<string>' then
         return "'" .. macros.unescape_string(value) .. "'"
     else
         return value
