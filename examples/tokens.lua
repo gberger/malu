@@ -1,13 +1,13 @@
 @macro tokens
-    print(_M.llex(next))
-    print(_M.llex(next))
-    print(_M.llex(next))
-    print(_M.llex(next))
-    print(_M.llex(next))
-    print(_M.llex(next))
-    print(_M.llex(next))
-    print(_M.llex(next))
-    print(_M.llex(next))
+    print(macros.llex(next))
+    print(macros.llex(next))
+    print(macros.llex(next))
+    print(macros.llex(next))
+    print(macros.llex(next))
+    print(macros.llex(next))
+    print(macros.llex(next))
+    print(macros.llex(next))
+    print(macros.llex(next))
 endmacro
 
 @tokens

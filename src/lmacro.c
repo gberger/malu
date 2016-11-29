@@ -15,6 +15,7 @@
 #include "lctype.h"
 #include "ldebug.h"
 #include "llex.h"
+#include "lualib.h"
 #include "lmacro.h"
 
 #define lua_swap(L) lua_insert(L, -2)
@@ -126,8 +127,8 @@ void read_macro (LexState *ls) {
     luaZ_resetbuffer(ls->buff);
 
 
-    /* get function from _G._M[macro_name] */
-    lua_getglobal(ls->L, "_M");
+    /* get function from macros[macro_name] */
+    lua_getglobal(ls->L, LUA_MACROLIBNAME);
     lua_getfield(ls->L, -1, getstr(ts));
     lua_remove(ls->L, -2);
 

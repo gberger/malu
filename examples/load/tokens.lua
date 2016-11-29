@@ -1,4 +1,4 @@
-_M.tokens = function(next)
+macros.tokens = function(next)
     print(llex(next))
     print(llex(next))
     print(llex(next))

@@ -1,6 +1,6 @@
 dofile"examples/_utils.lua"
 
-_M.swap = function(next)
+macros.swap = function(next)
     next() -- skip opening parenthesis
 
     local args = next_until(next, ')')

@@ -1,8 +1,8 @@
-_M.inner = function(next)
+macros.inner = function(next)
     return 'abc'
 end
 
-_M.outer = function(next)
+macros.outer = function(next)
     return "@inner"
 end
 

@@ -1,4 +1,4 @@
-_M.abc = function(next)
+macros.abc = function(next)
     return ''
 end
 

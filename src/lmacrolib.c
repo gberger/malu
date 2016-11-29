@@ -154,7 +154,7 @@ static int malu_argparse(lua_State *L) {
   args = lua_gettop(L);
 
   /* token, value = llex(next) */
-  lua_getglobal(L, "_M");
+  lua_getglobal(L, LUA_MACROLIBNAME);
   lua_getfield(L, -1, "llex");
   lua_pushvalue(L, 1);  /* next */
   lua_call(L, 1, 2);  /* llex(next) */
@@ -170,7 +170,7 @@ static int malu_argparse(lua_State *L) {
   lua_call(L, 1, 0);
 
   /* token, value = llex(next) */
-  lua_getglobal(L, "_M");
+  lua_getglobal(L, LUA_MACROLIBNAME);
   lua_getfield(L, -1, "llex");
   lua_pushvalue(L, 1);  /* next */
   lua_call(L, 1, 2);  /* llex(next) */
@@ -228,7 +228,7 @@ static int malu_argparse(lua_State *L) {
     }
 
     /* token, value = llex(next) */
-    lua_getglobal(L, "_M");
+    lua_getglobal(L, LUA_MACROLIBNAME);
     lua_getfield(L, -1, "llex");
     lua_pushvalue(L, 1);  /* next */
     lua_call(L, 1, 2);  /* llex(next) */
@@ -283,7 +283,7 @@ static int malu_macro(lua_State *L) {
   lua_append(L, macro_body);
 
   /* token, value = llex(next) */
-  lua_getglobal(L, "_M");
+  lua_getglobal(L, LUA_MACROLIBNAME);
   lua_getfield(L, -1, "llex");
   lua_pushvalue(L, 1);  /* next */
   lua_call(L, 1, 2);  /* llex(next) */
@@ -300,7 +300,7 @@ static int malu_macro(lua_State *L) {
   lua_call(L, 1, 0);
 
   /* token, value = llex(next) */
-  lua_getglobal(L, "_M");
+  lua_getglobal(L, LUA_MACROLIBNAME);
   lua_getfield(L, -1, "llex");
   lua_pushvalue(L, 1);  /* next */
   lua_call(L, 1, 2);  /* llex(next) */
@@ -322,7 +322,7 @@ static int malu_macro(lua_State *L) {
     }
 
     /* token, value = llex(next) */
-    lua_getglobal(L, "_M");
+    lua_getglobal(L, LUA_MACROLIBNAME);
     lua_getfield(L, -1, "llex");
     lua_pushvalue(L, 1);  /* next */
     lua_call(L, 1, 2);  /* llex(next) */
@@ -353,10 +353,10 @@ static int malu_macro(lua_State *L) {
     lua_pop(L, 1);
   }
 
-  /* _M[macro_name] = fn */
+  /* macros[macro_name] = fn */
   lua_pushcclosure(L, macro_closure, 1);
 
-  lua_getglobal(L, "_M");
+  lua_getglobal(L, LUA_MACROLIBNAME);
   lua_swap(L);
   lua_setfield(L, -2, macro_name);
 
@@ -386,7 +386,7 @@ static int define_closure(lua_State *L) {
   int i;
 
   /* args = argparse(next) */
-  lua_getglobal(L, "_M");
+  lua_getglobal(L, LUA_MACROLIBNAME);
   lua_getfield(L, -1, "argparse");
   lua_pushvalue(L, 1);  /* next */
   lua_call(L, 1, 1);
@@ -422,7 +422,7 @@ static int malu_define(lua_State *L) {
   const char *token, *define_name, *define_body;
 
   /* token, value = llex(next) */
-  lua_getglobal(L, "_M");
+  lua_getglobal(L, LUA_MACROLIBNAME);
   lua_getfield(L, -1, "llex");
   lua_pushvalue(L, 1);  /* next */
   lua_call(L, 1, 2);  /* llex(next) */
@@ -439,7 +439,7 @@ static int malu_define(lua_State *L) {
   lua_call(L, 1, 0);
 
   /* token, value = llex(next) */
-  lua_getglobal(L, "_M");
+  lua_getglobal(L, LUA_MACROLIBNAME);
   lua_getfield(L, -1, "llex");
   lua_pushvalue(L, 1);  /* next */
   lua_call(L, 1, 2);  /* llex(next) */
@@ -455,11 +455,11 @@ static int malu_define(lua_State *L) {
   lua_pushboolean(L, strcmp(token, "<string>") == 0);
   lua_call(L, 1, 0);
 
-  /* _M[define_name] = fn */
+  /* macros[define_name] = fn */
   lua_pushstring(L, define_body);
   lua_pushcclosure(L, define_closure, 1);
 
-  lua_getglobal(L, "_M");
+  lua_getglobal(L, LUA_MACROLIBNAME);
   lua_swap(L);
   lua_setfield(L, -2, define_name);
 

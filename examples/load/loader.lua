@@ -1,4 +1,4 @@
-_M.using = function(next)
+macros.using = function(next)
     assert(load(next))()
     print('dentro')
 

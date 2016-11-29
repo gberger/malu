@@ -1,5 +1,5 @@
 @macro m
-    local args = _M.argparse(next)
+    local args = macros.argparse(next)
     for i, arg in ipairs(args) do
         print(i, arg)
     end
