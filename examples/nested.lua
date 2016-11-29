@@ -1,12 +1,10 @@
-_M.inner = function(next)
+@macro inner
     return 'abc'
-end
+endmacro
 
-_M.outer = function(next)
+@macro outer
     return "@inner"
-end
+endmacro
 
-load([[
 abc = 5
 print(@outer)
-]])()

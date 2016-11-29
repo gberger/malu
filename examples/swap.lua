@@ -1,17 +1,6 @@
-dofile"examples/_utils.lua"
+@define swap '$1, $2 = $2, $1'
 
-_M.swap = function(next)
-    next() -- skip opening parenthesis
-
-    local args = next_until(next, ')')
-    local a, b = args:match('([_%a][_%w]*)%s*,%s*([_%a][_%w]*)')
-
-    return ('do local temp = $a; $a = $b; $b = temp; end'):gsub('$a', a):gsub('$b', b)
-end
-
-load([[
 a = 1
 b = 2
-@swap(a, b)
+@swap(a, b);
 print(a)
-]])()

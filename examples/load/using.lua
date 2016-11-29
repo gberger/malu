@@ -1,10 +1,9 @@
-@macro using
-    local token, value, name
+dofile"examples/_utils.lua"
 
-    token, value = _M.llex(next)  -- skip opening parens
-    token, name = _M.llex(next)   -- argument
-    token, value = _M.llex(next)  -- skip closing parens
+_M.using = function(next)
+    next() -- skip opening parenthesis
 
+    local name = next_until(next, ')')
     local tbl = _G[name]
     local str = ''
 
@@ -13,7 +12,9 @@
     end
 
     return str
-endmacro
+end
 
+load([[
 @using(math)
 print(sin(5))
+]])()
