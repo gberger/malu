@@ -40,7 +40,7 @@
 static const char *read_from_next(lua_State *L, void *ud, size_t *size) {
   (void) ud;  /* unused */
 
-  /* the first argument to luaB_llex, should be a `next` function */
+  /* the first argument to malu_llex, should be a `next` function */
   lua_pushvalue(L, 1);
   lua_call(L, 0, 1);
 
@@ -97,7 +97,7 @@ static void tokenpushpair(lua_State *L, Token t) {
 ** It will use that function as input for the internal `llex` function,
 ** and return the name and value of the first token that was read.
 */
-static int luaB_llex(lua_State *L) {
+static int malu_llex(lua_State *L) {
   lua_Reader reader = read_from_next;
   const char *chunkname = "internal llex";
   Mbuffer buff;
@@ -138,13 +138,13 @@ static int luaB_llex(lua_State *L) {
 */
 
 /*
-** uses `luaB_llex` to parse an input stream like (1, abc.xyz)
+** uses `malu_llex` to parse an input stream like (1, abc.xyz)
 ** into a table of arguments
 **
 ** parameters:
 ** 1: a function, `next`
 */
-static int luaB_argparse(lua_State *L) {
+static int malu_argparse(lua_State *L) {
   int args;
   const char *token, *value;
   int parens = 0, brackets = 0, braces = 0;
@@ -272,7 +272,7 @@ static int macro_closure(lua_State *L) {
   return 1;
 }
 
-static int luaB_macro(lua_State *L) {
+static int malu_macro(lua_State *L) {
   int macro_body;
   const char *token, *value, *macro_name;
 
@@ -418,7 +418,7 @@ static int define_closure(lua_State *L) {
   return 1;
 }
 
-static int luaB_define(lua_State *L) {
+static int malu_define(lua_State *L) {
   const char *token, *define_name, *define_body;
 
   /* token, value = llex(next) */
@@ -473,10 +473,10 @@ static int luaB_define(lua_State *L) {
 
 
 static const luaL_Reg macro_funcs[] = {
-    {"llex", luaB_llex},
-    {"argparse", luaB_argparse},
-    {"macro", luaB_macro},
-    {"define", luaB_define},
+    {"llex", malu_llex},
+    {"argparse", malu_argparse},
+    {"macro", malu_macro},
+    {"define", malu_define},
     {NULL, NULL}
 };
 
