@@ -1,7 +1,8 @@
 @loadfile "examples/_def_macro.lua"
 
 
-@macro tokens
+@macro tokens do
+    print('huh')
     print(macros.llex(next))
     print(macros.llex(next))
     print(macros.llex(next))
@@ -11,8 +12,7 @@
     print(macros.llex(next))
     print(macros.llex(next))
     print(macros.llex(next))
-endmacro
+end
 
-@tokens
-3.14 123 abc.xyz  --[=[comment]=] "str \n" <= ! ~=
+@tokens 3.14 123 abc.xyz  --[=[comment]=] "str \n" <= ! ~=
 print('END!')

@@ -1,12 +1,12 @@
 @loadfile "examples/_def_macro.lua"
 
-@macro inner
+@macro inner do
     return 'abc'
-endmacro
+end
 
-@macro outer
+@macro outer do
     return "@inner"
-endmacro
+end
 
 abc = 5
 print(@outer)

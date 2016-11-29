@@ -2,7 +2,9 @@
 
 print('Hello Lua.')
 
-@macro   dumb
+@macro dumb do
+    print("I have a next function: ", next)
+
     if 1 == 1 then
         return "print(\"Things are okay.\")"
     else
@@ -12,6 +14,6 @@ print('Hello Lua.')
         end
         return "print(\"The universe is broken!\")"
     end
-endmacro
+end
 
 @dumb

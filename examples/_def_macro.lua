@@ -1,24 +1,17 @@
+dofile("examples/_macro_utils.lua")
+
 macros.macro = function(next)
     local token, value, macro_name
-    local macro_body = {"local next = ..."}
 
     token, macro_name = macros.llex(next)
-    assert(token == '<name>')
+    assert(token == '<name>', 'expected a name token')
 
-    token, value = macros.llex(next)
-    while not (token == '<name>' and value == 'endmacro') do
-        if token == '<string>' then
-            macro_body[#macro_body+1] = "'" .. value .. "'"
-        else
-            macro_body[#macro_body+1] = value
-        end
+    local macro_body = 'local next = ... ' .. macros.readblock(next)
+    local fn, e = load(macro_body)
 
-        token, value = macros.llex(next)
-    end
+    assert(not e, e)
 
-    local fn, e = load(table.concat(macro_body, ' '))
-
-    macros[macro_name] = function(next)
-        return fn(next)
+    macros[macro_name] = function(nnext)
+        return fn(nnext)
     end
 end
