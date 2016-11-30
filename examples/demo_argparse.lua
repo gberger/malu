@@ -1,7 +1,7 @@
 @loadfile "examples/_def_macro.lua"
 
 
-@macro demo_argparse do
+@defmacro demo_argparse do
    print('Parsing args...')
 
    local args = macros.argparse(next_char)

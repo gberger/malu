@@ -1,8 +1,8 @@
-@loadfile "examples/_def_macro.lua"
+@loadfile "examples/_def_defmacro.lua"
 
 print('Hello Lua.')
 
-@macro hello do
+@defmacro hello do
     print("I have a next_char function: ", next_char)
 
     if 1 == 1 then

@@ -1,7 +1,7 @@
 @loadfile "examples/_def_macro.lua"
 
 
-@macro tokens do
+@defmacro tokens do
   for i=1,9 do
     local token, value = macros.next_token(next_char)
     print(token, value, type(value))

@@ -1,6 +1,6 @@
 @loadfile "examples/_def_macro.lua"
 
-@macro reverse_names do
+@defmacro reverse_names do
     return macros.token_filter(next_char, function(t, v)
         if t == '<name>' then
             return t, v:reverse()

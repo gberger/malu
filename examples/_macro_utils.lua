@@ -31,6 +31,15 @@ macros.output_token = function(token, value)
     end
 end
 
+macros.output_tokens = function(list)
+    local result = {}
+    for i, tv in ipairs(list) do
+        result[i] = macros.output_token(tv[1], tv[2])
+    end
+
+    return table.concat(result, ' ')
+end
+
 macros.argparse = function(next_char)
     local parens = 0
     local brackets = 0
@@ -119,14 +128,15 @@ macros.argparse = function(next_char)
     return args
 end
 
-macros.readblock = function(next_char)
+macros.next_block = function(next_char)
     local t, v
     local stack = 1
-    local body = {'do'}
 
     -- first token
     t, v = macros.next_token(next_char)
     assert(t == 'do', 'expected "do"')
+
+    local body = {{t, v}}
 
     repeat
         t, v = macros.next_token(next_char)
@@ -136,10 +146,10 @@ macros.readblock = function(next_char)
             stack = stack - 1
         end
 
-        body[#body+1] = macros.output_token(t, v)
+        body[#body+1] = {t, v}
     until stack == 0
 
-    return table.concat(body, ' ')
+    return body
 end
 
 macros.token_filter = function(next_char, filter)

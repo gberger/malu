@@ -1,6 +1,6 @@
-@loadfile "examples/_def_demo_readblock.lua"
+@loadfile "examples/_def_demo_next_block.lua"
 
-@demo_readblock do
+@demo_next_block do
     local a = 1
     local b = 2
     if a > b then
