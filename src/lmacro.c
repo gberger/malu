@@ -134,7 +134,7 @@ void read_macro (LexState *ls) {
 
     if (!lua_isfunction(ls->L, -1)) {
       lua_pop(ls->L, 1);
-      lua_pushfstring(ls->L, "macro %s does not existe", getstr(ts));
+      lua_pushfstring(ls->L, "macro %s does not exist", getstr(ts));
       const char* msg = lua_tostring(ls->L, -1);
       lua_pop(ls->L, 1);
       return lexerror(ls, msg, TK_MACRO);
