@@ -1,4 +1,4 @@
-@loadfile "examples/_def_defmacro.lua"
+@loadfile "malu/_def_defmacro.lua"
 
 
 @defmacro demo_argparse do

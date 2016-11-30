@@ -1,4 +1,4 @@
-@loadfile "examples/_def_define.lua"
+@loadfile "malu/_def_define.lua"
 
 @define reduce [[
     (function()

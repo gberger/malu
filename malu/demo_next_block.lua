@@ -1,4 +1,4 @@
-@loadfile "examples/_def_demo_next_block.lua"
+@loadfile "malu/_def_demo_next_block.lua"
 
 @demo_next_block do
     local a = 1

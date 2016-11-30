@@ -1,4 +1,4 @@
-dofile "examples/_macro_utils.lua"
+dofile "malu/_macro_utils.lua"
 
 -- local add = \x,y -> (x + y)
 -- becomes:

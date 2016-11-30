@@ -1,4 +1,4 @@
-dofile "examples/_macro_utils.lua"
+dofile "malu/_macro_utils.lua"
 
 macros.demo_next_block = function(next_char)
     print('Reading block...')
