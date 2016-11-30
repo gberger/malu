@@ -35,22 +35,22 @@
 */
 
 /*
-** Used as the lua_Reader function for the 'llex' function.
+** Used as the lua_Reader function for the 'next_token' function.
 */
-static const char *read_from_next(lua_State *L, void *ud, size_t *size) {
+static const char *read_from_next_char(lua_State *L, void *ud, size_t *size) {
   (void) ud;  /* unused */
 
-  /* the first argument to malu_llex, should be a `next` function */
+  /* the first argument to malu_next_token, should be a `next_char` function */
   lua_pushvalue(L, 1);
   lua_call(L, 0, 1);
 
-  /* if `next` returns nil, no more input to process */
+  /* if `next_char` returns nil, no more input to process */
   if (lua_isnil(L, -1)) {
     *size = 0;
     return NULL;
   }
 
-  /* the return of `next` is the result of the reader */
+  /* the return of `next_char` is the result of the reader */
   const char *str = lua_tostring(L, -1);
   lua_pop(L, 1);
 
@@ -91,15 +91,15 @@ static void tokenpushpair(lua_State *L, Token t) {
 }
 
 /*
-** 'llex' function.
+** 'next_token' function.
 ** Receives a function that, when called repeatedly, should return strings
 ** corresponding to Lua source code.
 ** It will use that function as input for the internal `llex` function,
 ** and return the name and value of the first token that was read.
 */
-static int malu_llex(lua_State *L) {
-  lua_Reader reader = read_from_next;
-  const char *chunkname = "internal llex";
+static int malu_next_token(lua_State *L) {
+  lua_Reader reader = read_from_next_char;
+  const char *chunkname = "internal llex/next_token";
   Mbuffer buff;
   char pending[2] = {0,0};
 
@@ -114,13 +114,14 @@ static int malu_llex(lua_State *L) {
   luaZ_initbuffer(L, &buff);
   ls.buff = &buff;
   luaX_setinput(L, &ls, &z, luaS_new(L, chunkname), zgetc((&z)));
-  luaX_next(&ls);  /* read one token */
+  ls.t.token = llex(&ls, &ls.t.seminfo);  /* read one token */
   L->top--;  /* remove scanner's table */
 
   if (ls.t.token == TK_EOS) {
     return 0;
   }
 
+  /* call next_char(ls.current), so it can hold this unused character */
   pending[0] = ls.current;
   lua_pushstring(L, pending);
   lua_call(L, 1, 0);
@@ -136,11 +137,11 @@ static int malu_llex(lua_State *L) {
 static int malu_loadfile(lua_State *L) {
   const char *token, *value;
 
-  /* token, value = llex(next) */
+  /* token, value = next_token(next_char) */
   lua_getglobal(L, LUA_MACROLIBNAME);
-  lua_getfield(L, -1, "llex");
-  lua_pushvalue(L, 1);  /* next */
-  lua_call(L, 1, 2);  /* llex(next) */
+  lua_getfield(L, -1, "next_token");
+  lua_pushvalue(L, 1);  /* next_char */
+  lua_call(L, 1, 2);  /* next_token(next_char) */
 
   /* define_name = value */
   value = lua_tostring(L, -1);
@@ -162,7 +163,7 @@ static int malu_loadfile(lua_State *L) {
 
 
 static const luaL_Reg macro_funcs[] = {
-    {"llex", malu_llex},
+    {"next_token", malu_next_token},
     {"loadfile", malu_loadfile},
     {NULL, NULL}
 };

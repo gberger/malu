@@ -3,7 +3,7 @@
 print('Hello Lua.')
 
 @macro hello do
-    print("I have a next function: ", next)
+    print("I have a next_char function: ", next_char)
 
     if 1 == 1 then
         return "print(\"Things are okay.\")"

@@ -1,9 +1,9 @@
-macros.using = function(next)
+macros.using = function(next_char)
     local token, value, name
 
-    token, value = macros.llex(next)
-    token, name = macros.llex(next)
-    token, value = macros.llex(next)
+    token, value = macros.next_token(next_char)
+    token, name = macros.next_token(next_char)
+    token, value = macros.next_token(next_char)
 
     local tbl = _G[name]
     local str = ''

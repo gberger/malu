@@ -4,7 +4,7 @@
 @macro demo_argparse do
    print('Parsing args...')
 
-   local args = macros.argparse(next)
+   local args = macros.argparse(next_char)
 
    print('Printing args:')
    for i, arg in ipairs(args) do

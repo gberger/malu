@@ -2,17 +2,11 @@
 
 
 @macro tokens do
-    print(macros.llex(next))
-    print(macros.llex(next))
-    print(macros.llex(next))
-    print(macros.llex(next))
-    print(macros.llex(next))
-    print(macros.llex(next))
-    print(macros.llex(next))
-    print(macros.llex(next))
-    print(macros.llex(next))
-    print(macros.llex(next))
+  for i=1,9 do
+    local token, value = macros.next_token(next_char)
+    print(token, value, type(value))
+  end
 end
 
-@tokens 3.14 123 \abc.xyz  --[=[comment]=] "str \n" <= ! ~=
+@tokens 3e4 123 abc.xyz  --[=[comment]=] "str" <= ! ~=
 print('END!')

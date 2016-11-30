@@ -1,5 +1,5 @@
-macros.using = function(next)
-    assert(load(next))()
+macros.using = function(next_char)
+    assert(load(next_char))()
     print('dentro')
 
     return 'print("output da macro")'

@@ -1,15 +1,15 @@
-@loadfile "examples/_macro_utils.lua"
+dofile "examples/_macro_utils.lua"
 
 -- local add = \x,y -> (x + y)
 -- becomes:
 -- local add = function(x, y) return x + y end
-macros.enable_lambdas = function(next)
+macros.enable_lambdas = function(next_char)
     local state = 1
     local param_names = {}
     local parens_stack = 0
     local body = {}
 
-    return macros.token_filter(next, function(t, v)
+    return macros.token_filter(next_char, function(t, v)
         -- states:
         -- 1 = waiting
         -- 2 = param name

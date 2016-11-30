@@ -2,7 +2,7 @@
 
 
 @macro demo_unescape_string do
-    local t, v = macros.llex(next)
+    local t, v = macros.next_token(next_char)
     return "'" .. macros.unescape_string(v) .. "'"
 end
 

@@ -1,8 +1,8 @@
-@loadfile "examples/_macro_utils.lua"
+dofile "examples/_macro_utils.lua"
 
-macros.demo_readblock = function(next)
+macros.demo_readblock = function(next_char)
     print('Reading block...')
-    local block = macros.readblock(next)
+    local block = macros.readblock(next_char)
     print('Read block is:')
     print(block)
     return block

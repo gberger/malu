@@ -31,7 +31,7 @@ macros.output_token = function(token, value)
     end
 end
 
-macros.argparse = function(next)
+macros.argparse = function(next_char)
     local parens = 0
     local brackets = 0
     local braces = 0
@@ -41,7 +41,7 @@ macros.argparse = function(next)
     local t, v
 
     -- first token
-    t, v = macros.llex(next)
+    t, v = macros.next_token(next_char)
 
     if t == '<string>' then
         -- fn "str"
@@ -52,7 +52,7 @@ macros.argparse = function(next)
         -- one table argument
         current = { '{' }
 
-        t, v = macros.llex(next)
+        t, v = macros.next_token(next_char)
         while true do
             if t == '{' then
                 braces = braces + 1
@@ -65,7 +65,7 @@ macros.argparse = function(next)
             if braces == -1 then
                 break
             end
-            t, v = macros.llex(next)
+            t, v = macros.next_token(next_char)
         end
 
         args[#args+1] = table.concat(current, ' ')
@@ -73,7 +73,7 @@ macros.argparse = function(next)
         -- fn(a, t.xyz, 5)
         -- full arguments list
 
-        t, v = macros.llex(next)
+        t, v = macros.next_token(next_char)
         while true do
             if t == '(' then
                 parens = parens + 1
@@ -107,7 +107,7 @@ macros.argparse = function(next)
                 current[#current+1] = macros.output_token(t, v)
             end
 
-            t, v = macros.llex(next)
+            t, v = macros.next_token(next_char)
         end
         if #current > 0 then
             args[#args+1] = table.concat(current, ' ')
@@ -119,17 +119,17 @@ macros.argparse = function(next)
     return args
 end
 
-macros.readblock = function(next)
+macros.readblock = function(next_char)
     local t, v
     local stack = 1
     local body = {'do'}
 
     -- first token
-    t, v = macros.llex(next)
+    t, v = macros.next_token(next_char)
     assert(t == 'do', 'expected "do"')
 
     repeat
-        t, v = macros.llex(next)
+        t, v = macros.next_token(next_char)
         if t == 'function' or t == 'if' or t == 'do' then
             stack = stack + 1
         elseif t == 'end' then
@@ -142,14 +142,14 @@ macros.readblock = function(next)
     return table.concat(body, ' ')
 end
 
-macros.token_filter = function(next, filter)
+macros.token_filter = function(next_char, filter)
     local t, v
     local output = {}
 
-    t, v = macros.llex(next)
+    t, v = macros.next_token(next_char)
     repeat
         output[#output+1] = macros.output_token(filter(t, v))
-        t, v = macros.llex(next)
+        t, v = macros.next_token(next_char)
     until t == nil
 
     return table.concat(output, ' ')
