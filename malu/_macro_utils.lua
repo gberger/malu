@@ -117,7 +117,7 @@ macros.argparse = function(next_char)
             t, v = macros.next_token(next_char)
         end
         if #current > 0 then
-            args[#args+1] = current, ' ')
+            args[#args+1] = current
         end
     else
         print('bad args')

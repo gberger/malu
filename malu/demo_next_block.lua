@@ -1,4 +1,13 @@
-@loadfile "malu/_def_demo_next_block.lua"
+@loadfile "malu/_def_defmacro.lua"
+
+@defmacro demo_next_block do
+   print('Reading block...')
+   local block = macros.next_block(next_char)
+   print('Read block is:')
+   print(macros.output_tokens(block))
+   return block
+end
+
 
 @demo_next_block do
     local a = 1

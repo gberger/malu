@@ -1,4 +1,4 @@
-dofile("malu/_macro_utils.lua")
+dofile "malu/_macro_utils.lua"
 
 macros.defmacro = function(next_char)
     local token, value, macro_name
