@@ -1,4 +1,4 @@
-macros.using = function(next_char)
+macros.load_next_char = function(next_char)
     assert(load(next_char))()
     print('dentro')
 
@@ -6,6 +6,6 @@ macros.using = function(next_char)
 end
 
 assert(load([[
-@using
+@load_next_char
 print('comido pelo load')
 ]]))()

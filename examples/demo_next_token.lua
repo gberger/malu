@@ -8,5 +8,7 @@
   end
 end
 
-@tokens 3e4 123 abc.xyz  --[=[comment]=] "str" <= ! ~=
+@tokens 3e4
+123
+abc.xyz  --[=[comment]=] "str" <= ! ~=
 print('END!')
