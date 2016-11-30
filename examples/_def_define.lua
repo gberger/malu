@@ -12,7 +12,7 @@ macros.define = function(next_char)
 
         local result = macro_body
         for i, arg in ipairs(args) do
-            result = result:gsub(('$' .. i), arg)
+            result = result:gsub(('$' .. i), macros.output_tokens(arg))
         end
 
         return result

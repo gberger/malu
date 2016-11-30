@@ -46,7 +46,6 @@ macros.argparse = function(next_char)
     local braces = 0
     local blocks = 0
     local args = {}
-    local current = {}
     local t, v
 
     -- first token
@@ -55,11 +54,11 @@ macros.argparse = function(next_char)
     if t == '<string>' then
         -- fn "str"
         -- one string argument
-        args[1] = macros.output_token(t, v)
+        args[1] = {{t, v}}
     elseif t == '{' then
         -- fn {a=1, b=2}
         -- one table argument
-        current = { '{' }
+        args[1] = {{t, v}}
 
         t, v = macros.next_token(next_char)
         while true do
@@ -69,18 +68,17 @@ macros.argparse = function(next_char)
                 braces = braces - 1
             end
 
-            current[#current+1] = macros.output_token(t, v)
+            args[1][#args[1]+1] = {t, v}
 
             if braces == -1 then
                 break
             end
             t, v = macros.next_token(next_char)
         end
-
-        args[#args+1] = table.concat(current, ' ')
     elseif t == '(' then
         -- fn(a, t.xyz, 5)
         -- full arguments list
+        local current = {}
 
         t, v = macros.next_token(next_char)
         while true do
@@ -110,16 +108,16 @@ macros.argparse = function(next_char)
             assert(blocks >= 0, 'unexpected function/if/do/end blocks mismatch')
 
             if t == ',' and parens == 0 and brackets == 0 and braces == 0 and blocks == 0 then
-                args[#args+1] = table.concat(current, ' ')
+                args[#args+1] = current
                 current = {}
             else
-                current[#current+1] = macros.output_token(t, v)
+                current[#current+1] = {t, v}
             end
 
             t, v = macros.next_token(next_char)
         end
         if #current > 0 then
-            args[#args+1] = table.concat(current, ' ')
+            args[#args+1] = current
         end
     else
         print('bad args')

@@ -1,4 +1,4 @@
-@loadfile "examples/_def_macro.lua"
+@loadfile "examples/_def_defmacro.lua"
 
 
 @defmacro demo_argparse do
@@ -8,7 +8,7 @@
 
    print('Printing args:')
    for i, arg in ipairs(args) do
-       print(i, arg)
+       print(i, macros.output_tokens(arg))
    end
 
    print()

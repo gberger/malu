@@ -1,4 +1,4 @@
-@loadfile "examples/_def_macro.lua"
+@loadfile "examples/_def_defmacro.lua"
 
 
 @defmacro tokens do
