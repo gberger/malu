@@ -1,5 +1,6 @@
 print('testing macro_utils')
 
+
 assert(macros)
 dofile("malu/_macro_utils.lua")
 
@@ -222,8 +223,3 @@ do
 
     assert(output == [[do 1 oof 'str' 3.14 end]])
 end
-
------------------------------------------------------------
-
-print()
-print("final OK !!!")
