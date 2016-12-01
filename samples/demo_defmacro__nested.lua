@@ -5,8 +5,9 @@
 end
 
 @defmacro outer do
-    return "@inner"
+    local abc = 5
+    return tostring(@inner + 10) .. ' + xyz'
 end
 
-abc = 5
+local xyz = 15
 print(@outer)
