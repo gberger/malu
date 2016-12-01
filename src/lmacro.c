@@ -58,14 +58,14 @@ static int next_char_closure(lua_State *L) {
   return 1;
 }
 
-typedef struct RecZioData {
+typedef struct ZioWrapperData {
   int reg_ref;
   size_t size;
   ZIO* prev_zio;
-} RecZioData;
+} ZioWrapperData;
 
-static const char *read_from_string_queue(lua_State *L, void *ud, size_t *size) {
-  RecZioData *data = (RecZioData*) ud;
+static const char *zio_wrapper_reader(lua_State *L, void *ud, size_t *size) {
+  ZioWrapperData *data = (ZioWrapperData*) ud;
 
   /* trying to fill but this reader has been used */
   if (data->size == 0) {
@@ -97,13 +97,13 @@ static const char *read_from_string_queue(lua_State *L, void *ud, size_t *size) 
 }
 
 void init_reczio(LexState *ls) {
-  RecZioData* recziodata = luaM_new(ls->L, RecZioData);
-  recziodata->size = lua_rawlen(ls->L, -1);
-  recziodata->reg_ref = luaL_ref(ls->L, LUA_REGISTRYINDEX); /* pops str */
-  recziodata->prev_zio = ls->z;
+  ZioWrapperData* data = luaM_new(ls->L, ZioWrapperData);
+  data->size = lua_rawlen(ls->L, -1);
+  data->reg_ref = luaL_ref(ls->L, LUA_REGISTRYINDEX); /* pops str */
+  data->prev_zio = ls->z;
 
   ZIO* new_zio = luaM_new(ls->L, ZIO);
-  luaZ_init(ls->L, new_zio, read_from_string_queue, recziodata);
+  luaZ_init(ls->L, new_zio, zio_wrapper_reader, data);
   ls->z = new_zio;
 }
 
