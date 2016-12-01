@@ -1,43 +1,25 @@
-macros.unescape_string = function(str)
-    local chars = {
-        "\\",
-        "\a",
-        "\b",
-        "\f",
-        "\n",
-        "\r",
-        "\t",
-        "\v",
-        "\"",
-        "\'",
-        "[",
-        "]",
-    }
+macros.next_block = function(next_char)
+    local t, v
+    local stack = 1
 
-    for i, char in ipairs(chars) do
-        str = str:gsub('%' .. char, "\\" .. string.byte(char))
-    end
+    -- first token
+    t, v = macros.next_token(next_char)
+    assert(t == 'do', 'expected "do"')
 
-    return str
-end
+    local body = {{t, v}}
 
-macros.output_token = function(token, value)
-    if token == nil or token == '<eof>' then
-        return ''
-    elseif token == '<string>' then
-        return "'" .. macros.unescape_string(value) .. "'"
-    else
-        return value
-    end
-end
+    repeat
+        t, v = macros.next_token(next_char)
+        if t == 'function' or t == 'if' or t == 'do' then
+            stack = stack + 1
+        elseif t == 'end' then
+            stack = stack - 1
+        end
 
-macros.output_tokens = function(list)
-    local result = {}
-    for i, tv in ipairs(list) do
-        result[i] = macros.output_token(tv[1], tv[2])
-    end
+        body[#body+1] = {t, v}
+    until stack == 0
 
-    return table.concat(result, ' ')
+    return body
 end
 
 macros.argparse = function(next_char)
@@ -126,39 +108,77 @@ macros.argparse = function(next_char)
     return args
 end
 
-macros.next_block = function(next_char)
-    local t, v
-    local stack = 1
+macros.unescape_string = function(str)
+    local chars = {
+        "\\",
+        "\a",
+        "\b",
+        "\f",
+        "\n",
+        "\r",
+        "\t",
+        "\v",
+        "\"",
+        "\'",
+        "[",
+        "]",
+    }
 
-    -- first token
-    t, v = macros.next_token(next_char)
-    assert(t == 'do', 'expected "do"')
+    for i, char in ipairs(chars) do
+        str = str:gsub('%' .. char, "\\" .. string.byte(char))
+    end
 
-    local body = {{t, v}}
-
-    repeat
-        t, v = macros.next_token(next_char)
-        if t == 'function' or t == 'if' or t == 'do' then
-            stack = stack + 1
-        elseif t == 'end' then
-            stack = stack - 1
-        end
-
-        body[#body+1] = {t, v}
-    until stack == 0
-
-    return body
+    return str
 end
 
-macros.token_filter = function(next_char, filter)
+macros.output_token = function(token, value)
+    if token == nil or token == '<eof>' then
+        return ''
+    elseif token == '<string>' then
+        return "'" .. macros.unescape_string(value) .. "'"
+    else
+        return value
+    end
+end
+
+macros.output_tokens = function(list)
+    local result = {}
+    for i, tv in ipairs(list) do
+        result[i] = macros.output_token(tv[1], tv[2])
+    end
+
+    return table.concat(result, ' ')
+end
+
+macros.token_filter = function(next_char, filter, cond)
     local t, v
     local output = {}
 
     t, v = macros.next_token(next_char)
     repeat
-        output[#output+1] = macros.output_token(filter(t, v))
+        t, v = filter(t, v)
+        if v then
+            output[#output+1] = macros.output_token(t, v)
+        else
+            output[#output+1] = t
+        end
         t, v = macros.next_token(next_char)
     until t == nil
 
     return table.concat(output, ' ')
+end
+
+macros.create_next_char = function(str)
+   return function(v)
+       if v ~= nil then
+           str = v .. str
+           return
+       end
+
+       char = str:sub(1, 1)
+       str = str:sub(2)
+
+       if char == '' then return nil end
+       return char
+   end
 end

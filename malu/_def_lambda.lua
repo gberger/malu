@@ -56,8 +56,7 @@ macros.enable_lambdas = function(next_char)
                 body[#body+1] = macros.output_token(t, v)
             else
                 state = 1
-                return '<lambda>',
-                    'function (' .. table.concat(param_names, ',')
+                return 'function (' .. table.concat(param_names, ',')
                             .. ') return ' .. table.concat(body, ' ') .. ' end'
             end
         end
