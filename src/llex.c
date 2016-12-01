@@ -38,8 +38,6 @@ void next(LexState *ls) {
     /* fix for llex function being too greedy */
     ls->current = ls->hold;
     ls->hold = -1;
-  } else if (has_active_macros(ls)) {
-    macro_next(ls);
   } else {
     /* classic next */
     ls->current = zgetc(ls->z);
@@ -165,7 +163,6 @@ void luaX_setinput (lua_State *L, LexState *ls, ZIO *z, TString *source,
   ls->lastline = 1;
   ls->source = source;
   ls->envn = luaS_newliteral(L, LUA_ENV);  /* get env name */
-  ls->msti = 0;
   luaZ_resizebuffer(ls->L, ls->buff, LUA_MINBUFFER);  /* initialize buffer */
 }
 

@@ -101,7 +101,6 @@ static int malu_next_token(lua_State *L) {
   lua_Reader reader = read_from_next_char;
   const char *chunkname = "internal llex/next_token";
   Mbuffer buff;
-  char pending[2] = {0,0};
 
   ZIO z;
   luaZ_init(L, &z, reader, NULL);
@@ -122,8 +121,7 @@ static int malu_next_token(lua_State *L) {
   }
 
   /* call next_char(ls.current), so it can hold this unused character */
-  pending[0] = ls.current;
-  lua_pushstring(L, pending);
+  lua_pushstring(L, cast(const char*, &ls.current));
   lua_call(L, 1, 0);
 
   tokenpushpair(L, ls.t);

@@ -12,55 +12,12 @@
 
 #include "lua.h"
 
+#include "lauxlib.h"
 #include "lctype.h"
 #include "ldebug.h"
 #include "llex.h"
 #include "lualib.h"
 #include "lmacro.h"
-
-#define lua_swap(L) lua_insert(L, -2)
-
-
-/*
-** updates ls->current by reading a character from the macro string
-** at the top of the macro strings table (stack).
-*/
-void macro_next (LexState *ls) {
-  size_t t_len;
-  char const* str;
-  lua_Integer str_index;
-  size_t str_len;
-
-  /* length of the macro string table, guaranteed to be >0 */
-  t_len = lua_rawlen(ls->L, ls->msti);
-
-  /* put the last string at the top of the stack */
-  lua_geti(ls->L, ls->msti, cast(lua_Integer, t_len));
-
-  /* get it from the stack */
-  str = lua_tolstring(ls->L, -1, &str_len);
-  lua_pop(ls->L, 1);
-
-  /* get the index we're at in this string */
-  str_index = ls->msi[t_len - 1];
-
-  /* store the char at that index, also increment the index */
-  ls->current = str[str_index];
-  ls->msi[t_len - 1] = cast(int, str_index + 1);
-
-  /* verify if we reached the end of the string */
-  if (ls->msi[t_len - 1] == (long long) str_len) {
-    /* remove it from the table */
-    lua_pushnil(ls->L);
-    lua_seti(ls->L, ls->msti, cast(lua_Integer, t_len));
-
-    if (t_len == 1) {
-      /* table is now empty, pop it */
-      ls->msti = 0;
-      lua_pop(ls->L, 1);
-    }
-  }
-}
 
 
 /*
@@ -70,7 +27,6 @@ void macro_next (LexState *ls) {
 */
 static int next_char_closure(lua_State *L) {
   LexState *ls = lua_touserdata(L, lua_upvalueindex(1));
-  char charstr[2] = {0, 0};
 
   /* if called with a char, use it as current and hold the current! */
   if (lua_gettop(L) > 0) {
@@ -84,7 +40,6 @@ static int next_char_closure(lua_State *L) {
     return 0;
   }
 
-
   if (ls->current == EOZ) {
     return 0;
   }
@@ -93,8 +48,7 @@ static int next_char_closure(lua_State *L) {
     ls->current = 32;
   }
 
-  charstr[0] = cast(char, ls->current);
-  lua_pushstring(ls->L, charstr);
+  lua_pushstring(ls->L, cast(const char*, &ls->current));
 
   next(ls);
   if (ls->current == EOZ) {
@@ -104,33 +58,70 @@ static int next_char_closure(lua_State *L) {
   return 1;
 }
 
+typedef struct RecZioData {
+  int reg_ref;
+  size_t size;
+  ZIO* prev_zio;
+} RecZioData;
+
+static const char *read_from_string_queue(lua_State *L, void *ud, size_t *size) {
+  RecZioData *data = (RecZioData*) ud;
+
+  /* trying to fill but this reader has been used */
+  if (data->size == 0) {
+    /* if we still have the ref to the string, unref it */
+    if (data->reg_ref > 0) {
+      luaL_unref(L, LUA_REGISTRYINDEX, data->reg_ref);
+      data->reg_ref = 0;
+    }
+
+    /* see if previous zio has a buffer left */
+    if (data->prev_zio->n > 0) {
+      *size = data->prev_zio->n;
+      data->prev_zio->n = 0;
+      return data->prev_zio->p;
+    }
+
+    /* call reader from previous zio */
+    return data->prev_zio->reader(L, data->prev_zio->data, size);
+  }
+
+  *size = data->size;
+  data->size = 0;
+
+  /* get string from registry; don't unref it yet, it will still be used! */
+  lua_rawgeti(L, LUA_REGISTRYINDEX, data->reg_ref);
+  const char *str = lua_tostring(L, -1);
+  lua_pop(L, 1);
+  return str;
+}
+
+void init_reczio(LexState *ls) {
+  RecZioData* recziodata = luaM_new(ls->L, RecZioData);
+  recziodata->size = lua_rawlen(ls->L, -1);
+  recziodata->reg_ref = luaL_ref(ls->L, LUA_REGISTRYINDEX); /* pops str */
+  recziodata->prev_zio = ls->z;
+
+  ZIO* new_zio = luaM_new(ls->L, ZIO);
+  luaZ_init(ls->L, new_zio, read_from_string_queue, recziodata);
+  ls->z = new_zio;
+}
+
 
 /*
 ** called from call_macro, immediately after calling macro
 ** store its result in the macro strings table
 */
 void save_substitution_string(LexState *ls) {
-  char charstr[2] = {0, 0};
-
   /* if the function call returns a non-empty string, add to the lex queue */
   if (lua_type(ls->L, -1) == LUA_TSTRING && lua_rawlen(ls->L, -1) > 0) {
-    /* initialize macro string table if needed */
-    if (ls->msti == 0) {
-      lua_newtable(ls->L);
-      lua_swap(ls->L);
-      ls->msti = lua_gettop(ls->L) - 1;
+    if (ls->current != EOZ) {
+      /* macro_str = macro_str .. ls->current */
+      lua_pushstring(ls->L, cast(const char *, &ls->current));
+      lua_concat(ls->L, 2);
     }
 
-    /* macro_str = macro_str .. ls->current */
-    charstr[0] = cast(char, ls->current);
-    lua_pushstring(ls->L, charstr);
-    lua_concat(ls->L, 2);
-
-    /* push the macro_str to the end of the macro_table, initialize msi */
-    lua_seti(ls->L, ls->msti,
-             cast(lua_Integer, lua_rawlen(ls->L, ls->msti)) + 1);
-    ls->msi[lua_rawlen(ls->L, ls->msti) - 1] = 0;
-
+    init_reczio(ls);
     next(ls);
   } else {
     /* discard the return */

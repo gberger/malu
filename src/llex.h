@@ -84,8 +84,6 @@ typedef struct LexState {
   struct Dyndata *dyd;  /* dynamic structures used by the parser */
   TString *source;  /* current source name */
   TString *envn;  /* environment variable name */
-  int msi[NUM_MACRO_STRING]; /* (nested) macro string indices */
-  int msti; /* macro string table index in the stack */
   int hold; /* character on hold */
 } LexState;
 

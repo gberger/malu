@@ -8,5 +8,5 @@ end
 
 load([[
 abc = 5
-print(@outer)
+print(@outer + @outer)
 ]])()
