@@ -1,7 +1,7 @@
 print('testing defmacro')
 
 
-@loadfile "malu/_def_defmacro.lua"
+@loadfile "malu/def_defmacro.lua"
 
 @defmacro dm1 do
     assert(type(next_char) == 'function')

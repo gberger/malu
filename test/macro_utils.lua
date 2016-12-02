@@ -2,7 +2,7 @@ print('testing macro_utils')
 
 
 assert(macros)
-dofile("malu/_macro_utils.lua")
+dofile("malu/macro_utils.lua")
 
 
 function assert_token_list(list)
