@@ -1,14 +1,14 @@
 macros.cube = function(next_char)
   next_char() -- skip opening parens
-  local name = ''
+  local exp = ''
   local current = next_char()
 
   repeat
-    name = name .. current
+    exp = exp .. current
     current = next_char()
   until current == ')'
 
-  return name .. '*' .. name .. '*' .. name
+  return exp .. '*' .. exp .. '*' .. exp
 end
 
 load[[
