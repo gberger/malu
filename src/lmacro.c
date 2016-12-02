@@ -97,6 +97,19 @@ static const char *zio_wrapper_reader(lua_State *L, void *ud, size_t *size) {
 }
 
 void init_reczio(LexState *ls) {
+  if (ls->current != EOZ) {
+    /* macro_str = macro_str .. ls->current */
+    lua_pushstring(ls->L, cast(const char *, &ls->current));
+    lua_concat(ls->L, 2);
+
+    /* if ls->hold then macro_str = macro_str .. ls->hold end */
+    if (ls->hold != -1) {
+      lua_pushstring(ls->L, cast(const char *, &ls->hold));
+      ls->hold = -1;
+      lua_concat(ls->L, 2);
+    }
+  }
+
   ZioWrapperData* data = luaM_new(ls->L, ZioWrapperData);
   data->size = lua_rawlen(ls->L, -1);
   data->reg_ref = luaL_ref(ls->L, LUA_REGISTRYINDEX); /* pops str */
@@ -115,12 +128,6 @@ void init_reczio(LexState *ls) {
 void save_substitution_string(LexState *ls) {
   /* if the function call returns a non-empty string, add to the lex queue */
   if (lua_type(ls->L, -1) == LUA_TSTRING && lua_rawlen(ls->L, -1) > 0) {
-    if (ls->current != EOZ) {
-      /* macro_str = macro_str .. ls->current */
-      lua_pushstring(ls->L, cast(const char *, &ls->current));
-      lua_concat(ls->L, 2);
-    }
-
     init_reczio(ls);
     next(ls);
   } else {
