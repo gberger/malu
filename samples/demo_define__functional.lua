@@ -1,10 +1,11 @@
 @loadfile "malu/def_define.lua"
+@loadfile "samples/def_forall.lua"
 
 @define reduce [[
     (function()
         local res = $2
-        for _i, _ in ipairs($1) do
-            res = res $3 _
+        @forall v in $1 do
+            res = res $3 v
         end
         return res
     end)()
@@ -14,9 +15,6 @@
 @define mul '@reduce($1, 1, *)'
 
 local t = {1, 5, 10}
-
-print( @reduce(t, 100, /) )
-
-print( @sum(t) )
-
-print( @mul(t) )
+print(@reduce(t, 100, /))  --> 2.0
+print(@sum(t))             --> 16
+print(@mul(t))             --> 50

@@ -11,7 +11,7 @@
     local str = ''
 
     for k, v in pairs(tbl) do
-        str = str .. ('local $field = $name.$field; '):gsub('$field', k):gsub('$name', name)
+        str = str .. ('local %s = %s.%s; '):format(k, name, k)
     end
 
     return str

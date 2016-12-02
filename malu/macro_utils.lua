@@ -102,7 +102,8 @@ macros.argparse = function(next_char)
             args[#args+1] = current
         end
     else
-        print('bad args')
+        print(t, v)
+        assert(false, 'bad args!')
     end
 
     return args
