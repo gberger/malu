@@ -150,7 +150,7 @@ macros.output_tokens = function(list)
     return table.concat(result, ' ')
 end
 
-macros.token_filter = function(next_char, filter, cond)
+macros.token_filter = function(next_char, filter)
     local t, v
     local output = {}
 

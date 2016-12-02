@@ -11,7 +11,7 @@ macros.cube = function(next_char)
   return name .. '*' .. name .. '*' .. name
 end
 
-
 load[[
   print(@cube(10))
 ]]()
+--> 1000

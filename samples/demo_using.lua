@@ -1,4 +1,4 @@
-@loadfile "malu/_def_defmacro.lua"
+@loadfile "malu/def_defmacro.lua"
 
 @defmacro using  do
     local token, value, name
