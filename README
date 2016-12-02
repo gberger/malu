@@ -1,6 +1,11 @@
+# Final Project in Computer Engineering
 
-This is Lua 5.3.3, released on 30 May 2016.
+## Malu: Macros in Lua. A study of the implementation and use of macros in the Lua language
 
-For installation instructions, license details, and
-further information about Lua, see doc/readme.html.
+**December/2016**
 
+By Guilherme Berger
+
+Advisor: Roberto Ierusalimschy
+
+Writeup (in Portuguese): https://docs.google.com/document/d/1xMA_DlwbsD14ck3TaeMZRnvS35PFjn-Uo-XvFpMSj40/edit?usp=sharing
