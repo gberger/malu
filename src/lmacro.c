@@ -126,10 +126,17 @@ void init_reczio(LexState *ls) {
 ** store its result in the macro strings table
 */
 void save_substitution_string(LexState *ls) {
+  int rettype = lua_type(ls->L, -1);
   /* if the function call returns a non-empty string, add to the lex queue */
-  if (lua_type(ls->L, -1) == LUA_TSTRING && lua_rawlen(ls->L, -1) > 0) {
-    init_reczio(ls);
-    next(ls);
+  if (rettype == LUA_TSTRING) {
+    if (lua_rawlen(ls->L, -1) > 0) {
+      init_reczio(ls);
+      next(ls);
+    } else {
+      lua_pop(ls->L, 1);
+    }
+  } else if (rettype != LUA_TNIL) {
+    lexerror(ls, "invalid return type for macro expansion", TK_MACRO);
   } else {
     /* discard the return */
     lua_pop(ls->L, 1);
