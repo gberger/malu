@@ -64,30 +64,29 @@ static const char *read_from_next_char(lua_State *L, void *ud, size_t *size) {
 ** (i.e., names and strings have their value pushed as strings,
 ** ints as ints, floats as floats)
 */
-static void tokenpushpair(lua_State *L, Token t) {
+static int pushtoken(lua_State *L, Token t) {
   if (t.token < FIRST_RESERVED) {
-    /* name and value are the same: just the char, like '!', '=' etc */
+    /* just the name, like '!', '=' etc */
     lua_pushfstring(L, "%c", t.token);
-    lua_pushfstring(L, "%c", t.token);
-  } else {
-    /* name first, then value based on which token */
-    lua_pushstring(L, TOKEN_NAME(t.token));
-    if (t.token < TK_EOS) {
-      /* name and value are still the same: 'and', 'for' etc */
-      lua_pushstring(L, TOKEN_NAME(t.token));
-    } else if (t.token == TK_EOS) {
-      lua_pushnil(L);
-    } else if (t.token == TK_FLT) {
-      /* 3.14 */
-      lua_pushnumber(L, t.seminfo.r);
-    } else if (t.token == TK_INT) {
-      /* 10 */
-      lua_pushinteger(L, t.seminfo.i);
-    } else if (t.token == TK_NAME || t.token == TK_STRING) {
-      /* 'value' */
-      lua_pushstring(L, getstr(t.seminfo.ts));
-    }
+    return 1;
   }
+
+  /* first the name, like 'for', 'function', or even '<string>' */
+  lua_pushstring(L, TOKEN_NAME(t.token));
+
+  /* then maybe info */
+  if (t.token == TK_FLT) {
+    lua_pushnumber(L, t.seminfo.r);   /* 3.14 */
+    return 2;
+  } else if (t.token == TK_INT) {
+    lua_pushinteger(L, t.seminfo.i);  /* 10 */
+    return 2;
+  } else if (t.token == TK_NAME || t.token == TK_STRING) {
+    lua_pushstring(L, getstr(t.seminfo.ts));   /* 'value' */
+    return 2;
+  }
+
+  return 1;
 }
 
 /*
@@ -95,7 +94,7 @@ static void tokenpushpair(lua_State *L, Token t) {
 ** Receives a function that, when called repeatedly, should return strings
 ** corresponding to Lua source code.
 ** It will use that function as input for the internal `llex` function,
-** and return the name and value of the first token that was read.
+** and return the name (and info, if any) of the first token that was read.
 */
 static int malu_next_token(lua_State *L) {
   lua_Reader reader = read_from_next_char;
@@ -124,9 +123,7 @@ static int malu_next_token(lua_State *L) {
   lua_pushstring(L, cast(const char*, &ls.current));
   lua_call(L, 1, 0);
 
-  tokenpushpair(L, ls.t);
-
-  return 2;
+  return pushtoken(L, ls.t);
 }
 
 /* }====================================================== */

@@ -1,8 +1,9 @@
 @loadfile "samples/def_lambda.lua"
 @enable_lambdas
 
+
 local add = \x,y -> (x + y)
-local add3 = \x,y,z -> (add(add(x, y), z))
+-- equivalent to: 
+-- local add = function(x, y) return x + y end
 
-print(add3(1, 2, 3)) --> 6
-
+print(add(1, 2)) --> 3

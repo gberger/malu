@@ -1,9 +1,9 @@
-@loadfile "malu/def_defmacro.lua"
+@loadfile "samples/def_defmacro.lua"
 
 
 @defmacro demo_unescape_string do
-    local t, v = macros.next_token(next_char)
-    return "'" .. macros.unescape_string(v) .. "'"
+    local token, info = macros.next_token(next_char)
+    return "'" .. macros.unescape_string(info) .. "'"
 end
 
 

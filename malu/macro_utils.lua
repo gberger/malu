@@ -1,22 +1,22 @@
 macros.next_block = function(next_char)
-    local t, v
+    local token, info
     local stack = 1
 
     -- first token
-    t, v = macros.next_token(next_char)
-    assert(t == 'do', 'expected "do"')
+    token, info = macros.next_token(next_char)
+    assert(token == 'do', 'expected "do"')
 
-    local body = {{t, v}}
+    local body = {{token, info}}
 
     repeat
-        t, v = macros.next_token(next_char)
-        if t == 'function' or t == 'if' or t == 'do' then
+        token, info = macros.next_token(next_char)
+        if token == 'function' or token == 'if' or token == 'do' then
             stack = stack + 1
-        elseif t == 'end' then
+        elseif token == 'end' then
             stack = stack - 1
         end
 
-        body[#body+1] = {t, v}
+        body[#body+1] = {token, info}
     until stack == 0
 
     return body
@@ -28,60 +28,60 @@ macros.argparse = function(next_char)
     local braces = 0
     local blocks = 0
     local args = {}
-    local t, v
+    local token, info
 
     -- first token
-    t, v = macros.next_token(next_char)
+    token, info = macros.next_token(next_char)
 
-    if t == '<string>' then
+    if token == '<string>' then
         -- fn "str"
         -- one string argument
-        args[1] = {{t, v}}
-    elseif t == '{' then
+        args[1] = {{ token, info }}
+    elseif token == '{' then
         -- fn {a=1, b=2}
         -- one table argument
-        args[1] = {{t, v}}
+        args[1] = {{ token, info }}
 
-        t, v = macros.next_token(next_char)
+        token, info = macros.next_token(next_char)
         while true do
-            if t == '{' then
+            if token == '{' then
                 braces = braces + 1
-            elseif t == '}' then
+            elseif token == '}' then
                 braces = braces - 1
             end
 
-            args[1][#args[1]+1] = {t, v}
+            args[1][#args[1]+1] = { token, info }
 
             if braces == -1 then
                 break
             end
-            t, v = macros.next_token(next_char)
+            token, info = macros.next_token(next_char)
         end
-    elseif t == '(' then
+    elseif token == '(' then
         -- fn(a, t.xyz, 5)
         -- full arguments list
         local current = {}
 
-        t, v = macros.next_token(next_char)
+        token, info = macros.next_token(next_char)
         while true do
-            if t == '(' then
+            if token == '(' then
                 parens = parens + 1
-            elseif t == ')' then
+            elseif token == ')' then
                 parens = parens - 1
                 if parens == -1 then
                     break
                 end
-            elseif t == '[' then
+            elseif token == '[' then
                 brackets = brackets + 1
-            elseif t == ']' then
+            elseif token == ']' then
                 brackets = brackets - 1
-            elseif t == '{' then
+            elseif token == '{' then
                 braces = braces + 1
-            elseif t == '}' then
+            elseif token == '}' then
                 braces = braces - 1
-            elseif t == 'function' or t == 'if' or t == 'do' then
+            elseif token == 'function' or token == 'if' or token == 'do' then
                 blocks = blocks + 1
-            elseif t == 'end' then
+            elseif token == 'end' then
                 blocks = blocks - 1
             end
 
@@ -89,20 +89,20 @@ macros.argparse = function(next_char)
             assert(braces >= 0, 'unexpected brackets mismatch')
             assert(blocks >= 0, 'unexpected function/if/do/end blocks mismatch')
 
-            if t == ',' and parens == 0 and brackets == 0 and braces == 0 and blocks == 0 then
+            if token == ',' and parens == 0 and brackets == 0 and braces == 0 and blocks == 0 then
                 args[#args+1] = current
                 current = {}
             else
-                current[#current+1] = {t, v}
+                current[#current+1] = { token, info }
             end
 
-            t, v = macros.next_token(next_char)
+            token, info = macros.next_token(next_char)
         end
         if #current > 0 then
             args[#args+1] = current
         end
     else
-        print(t, v)
+        print(token, info)
         assert(false, 'bad args!')
     end
 
@@ -132,39 +132,37 @@ macros.unescape_string = function(str)
     return str
 end
 
-macros.output_token = function(token, value)
+macros.output_token = function(token, info)
     if token == nil or token == '<eof>' then
         return ''
     elseif token == '<string>' then
-        return "'" .. macros.unescape_string(value) .. "'"
+        return "'" .. macros.unescape_string(info) .. "'"
+    elseif token == '<name>' or token == '<number>' or token == '<integer>' or token == '<literal>' then
+        return info
     else
-        return value
+        return token
     end
 end
 
 macros.output_tokens = function(list)
     local result = {}
-    for i, tv in ipairs(list) do
-        result[i] = macros.output_token(tv[1], tv[2])
+    for i, ti in ipairs(list) do
+        result[i] = macros.output_token(ti[1], ti[2])
     end
 
     return table.concat(result, ' ')
 end
 
 macros.token_filter = function(next_char, filter)
-    local t, v
+    local token, info
     local output = {}
 
-    t, v = macros.next_token(next_char)
+    token, info = macros.next_token(next_char)
     repeat
-        t, v = filter(t, v)
-        if v then
-            output[#output+1] = macros.output_token(t, v)
-        else
-            output[#output+1] = t
-        end
-        t, v = macros.next_token(next_char)
-    until t == nil
+        token, info = filter(token, info)
+        output[#output+1] = macros.output_token(token, info)
+        token, info = macros.next_token(next_char)
+    until token == nil
 
     return table.concat(output, ' ')
 end

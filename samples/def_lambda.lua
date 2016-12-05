@@ -9,7 +9,7 @@ macros.enable_lambdas = function(next_char)
     local parens_stack = 0
     local body = {}
 
-    return macros.token_filter(next_char, function(t, v)
+    return macros.token_filter(next_char, function(token, info)
         -- states:
         -- 1 = waiting
         -- 2 = param name
@@ -19,44 +19,44 @@ macros.enable_lambdas = function(next_char)
         -- 6 = body
 
         if state == 1 then
-            if t == '\\' then
+            if token == '\\' then
                 param_names = {}
                 body = {}
                 parens_stack = 0
                 state = 2
             else
-                return t, v
+                return token, info
             end
         elseif state == 2 then
-            assert(t == '<name>', 'expected name token in lambda params list')
-            param_names[#param_names+1] = v
+            assert(token == '<name>', 'expected name token in lambda params list')
+            param_names[#param_names+1] = info
             state = 3
         elseif state == 3 then
-            assert(t == ',' or t == '-', 'expected comma `,` or minus `-` token in lambda params list')
-            if t == ',' then
+            assert(token == ',' or token == '-', 'expected comma `,` or minus `-` token in lambda params list')
+            if token == ',' then
                 state = 2
-            elseif t == '-' then
+            elseif token == '-' then
                 state = 4
             end
         elseif state == 4 then
-            assert(t == '>', 'expected gt `>` token after lambda arrow')
+            assert(token == '>', 'expected gt `>` token after lambda arrow')
             state = 5
         elseif state == 5 then
-            assert(t == '(', 'expected open parens `(` token after lambda arrow')
+            assert(token == '(', 'expected open parens `(` token after lambda arrow')
             parens_stack = 1
             state = 6
         elseif state == 6 then
-            if t == '(' then
+            if token == '(' then
                 parens_stack = parens_stack + 1
-            elseif t == ')' then
+            elseif token == ')' then
                 parens_stack = parens_stack - 1
             end
 
             if parens_stack > 0 then
-                body[#body+1] = macros.output_token(t, v)
+                body[#body+1] = macros.output_token(token, info)
             else
                 state = 1
-                return 'function (' .. table.concat(param_names, ',')
+                return '<literal>', 'function (' .. table.concat(param_names, ',')
                             .. ') return ' .. table.concat(body, ' ') .. ' end'
             end
         end

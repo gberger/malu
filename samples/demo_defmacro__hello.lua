@@ -1,4 +1,4 @@
-@loadfile "malu/def_defmacro.lua"
+@loadfile "samples/def_defmacro.lua"
 
 print('Hello Lua.')
 

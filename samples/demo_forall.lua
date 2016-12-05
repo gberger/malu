@@ -4,7 +4,7 @@
     print(x)   --> 10   20   30
 end
 
-local t = {10, 20, 30}
+local t = {40, 50, 60}
 @forall x in t do
-    print(x)   --> 10   20   30
+    print(x)   --> 40   50   60
 end

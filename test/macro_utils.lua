@@ -8,7 +8,12 @@ dofile("malu/macro_utils.lua")
 function assert_token_list(list)
     for i, token in ipairs(list) do
         assert(type(token) == 'table')
-        assert(#token == 2)
+        assert(#token >= 1)
+        if token[1] == '<name>' or token[1] == '<string>' or token[1] == '<number>' or token[1] == '<integer>' then
+            assert(#token == 2)
+        else
+            assert(#token == 1)
+        end
     end
 end
 
@@ -34,7 +39,7 @@ end
 
 do
     print('--testing macros.next_token')
-    local next_char, tokens, t, v
+    local next_char, tokens, token, info
 
 
     tokens = [[
@@ -48,42 +53,42 @@ do
         << >> ::
     ]]
     next_char = macros.create_next_char(tokens)
-    for token in string.gmatch(tokens, "%S+") do
-        t, v = macros.next_token(next_char)
-        assert(t == token)
-        assert(v == token)
+    for tk in string.gmatch(tokens, "%S+") do
+        token, info = macros.next_token(next_char)
+        assert(token == tk)
+        assert(info == nil)
     end
 
     tokens = [[ 10 1000 0 999999999999999999 ]]
     next_char = macros.create_next_char(tokens)
-    for token in string.gmatch(tokens, "%S+") do
-        t, v = macros.next_token(next_char)
-        assert(t == '<integer>')
-        assert(v == tonumber(token))
+    for tk in string.gmatch(tokens, "%S+") do
+        token, info = macros.next_token(next_char)
+        assert(token == '<integer>')
+        assert(info == tonumber(tk))
     end
 
     tokens = [[ 0.4 4.57e-3 0.3e12 5e+20 ]]
     next_char = macros.create_next_char(tokens)
-    for token in string.gmatch(tokens, "%S+") do
-        t, v = macros.next_token(next_char)
-        assert(t == '<number>')
-        assert(v == tonumber(token))
+    for tk in string.gmatch(tokens, "%S+") do
+        token, info = macros.next_token(next_char)
+        assert(token == '<number>')
+        assert(info == tonumber(tk))
     end
 
     tokens = [[ name hello foo bar ]]
     next_char = macros.create_next_char(tokens)
-    for token in string.gmatch(tokens, "%S+") do
-        t, v = macros.next_token(next_char)
-        assert(t == '<name>')
-        assert(v == token)
+    for tk in string.gmatch(tokens, "%S+") do
+        token, info = macros.next_token(next_char)
+        assert(token == '<name>')
+        assert(info == tk)
     end
     
     tokens = " \"str\" 'str' [[str]] "
     next_char = macros.create_next_char(tokens)
-    for token in string.gmatch(tokens, "%S+") do
-        t, v = macros.next_token(next_char)
-        assert(t == '<string>')
-        assert(v == 'str')
+    for tk in string.gmatch(tokens, "%S+") do
+        token, info = macros.next_token(next_char)
+        assert(token == '<string>')
+        assert(info == 'str')
     end
 end
 

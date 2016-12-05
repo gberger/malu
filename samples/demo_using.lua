@@ -1,11 +1,11 @@
-@loadfile "malu/def_defmacro.lua"
+@loadfile "samples/def_defmacro.lua"
 
-@defmacro using  do
+@defmacro using do
     local token, value, name
 
-    token, value = macros.next_token(next_char)
+    assert(macros.next_token(next_char) == '(')
     token, name = macros.next_token(next_char)
-    token, value = macros.next_token(next_char)
+    assert(macros.next_token(next_char) == ')')
 
     local tbl = _G[name]
     local str = ''
