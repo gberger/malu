@@ -17,7 +17,7 @@ macros.enable_lambdas = function(next_char)
         -- 4 = arrow `>`
         -- 5 = open body parens
         -- 6 = body
-        
+
         if state == 1 then
             if token == '\\' then
                 param_names = {}

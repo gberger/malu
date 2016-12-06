@@ -178,16 +178,15 @@ end
 -- @return A string that represents the filtered input stream
 macros.token_filter = function(next_char, filter)
     local token, info
-    local output = {}
+    local filtered = {}
 
     token, info = macros.next_token(next_char)
     repeat
-        token, info = filter(token, info)
-        output[#output+1] = macros.output_token(token, info)
+        filtered[#filtered +1] = {filter(token, info)}
         token, info = macros.next_token(next_char)
     until token == nil
 
-    return table.concat(output, ' ')
+    return macros.output_tokens(filtered)
 end
 
 --- Creates a function that simulates next_char, for testing purposes
