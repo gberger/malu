@@ -10,6 +10,6 @@ end
 
 load[[
     @print_tokens
-    <= ! ~= for while if end
+    <= ! ~= for while if end  -- short comment
     3.14 123 abc.xyz  --[=[comment]=] "str"
 ]]

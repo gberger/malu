@@ -44,10 +44,6 @@ static int next_char_closure(lua_State *L) {
     return 0;
   }
 
-  if (ls->current == 10) {
-    ls->current = 32;
-  }
-
   lua_pushstring(ls->L, cast(const char*, &ls->current));
 
   next(ls);
