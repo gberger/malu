@@ -1,3 +1,6 @@
+--- Reads the next do/end block in the input stream.
+-- @param next_char The next_char function
+-- @return A list of tokens, corresponding to the block
 macros.next_block = function(next_char)
     local token, info
     local stack = 1
@@ -22,6 +25,10 @@ macros.next_block = function(next_char)
     return body
 end
 
+--- Reads arguments from a "function call" in the input stream.
+-- Can handle arguments `(like, this)`, `{like = this}`, and `"like this"`.
+-- @param next_char The next_char function
+-- @return A list of arguments. Each argument is a list of tokens
 macros.argparse = function(next_char)
     local parens = 0
     local brackets = 0
@@ -109,6 +116,9 @@ macros.argparse = function(next_char)
     return args
 end
 
+--- Unescapes a string, adding escape sequences
+-- @param str A string
+-- @return A string that represents the string as it might appear on Lua code
 macros.unescape_string = function(str)
     local chars = {
         "\\",
@@ -132,6 +142,11 @@ macros.unescape_string = function(str)
     return str
 end
 
+--- Converts a token to a string that represents how it might appear on Lua code
+-- @param token The name of the token, like "for" or "<name>"
+-- @param info (Optional) Additional semantic information associated with
+-- the token, such as a string or number
+-- @return A string that represents how the token might appear on Lua code
 macros.output_token = function(token, info)
     if token == nil or token == '<eof>' then
         return ''
@@ -144,6 +159,9 @@ macros.output_token = function(token, info)
     end
 end
 
+--- Converts a list of tokens using output_token
+-- @param list List of tokens, where each token is like {token, info}
+-- @return A string that represents how the tokens might appear on Lua code
 macros.output_tokens = function(list)
     local result = {}
     for i, ti in ipairs(list) do
@@ -153,6 +171,11 @@ macros.output_tokens = function(list)
     return table.concat(result, ' ')
 end
 
+--- Filters the tokens obtained from next_char according to a filter function
+-- @param next_char The next_char function
+-- @param filter A function that will receive (token, info) and must return
+-- another pair of (token, info), for each of the tokens in the input stream.
+-- @return A string that represents the filtered input stream
 macros.token_filter = function(next_char, filter)
     local token, info
     local output = {}
@@ -167,6 +190,12 @@ macros.token_filter = function(next_char, filter)
     return table.concat(output, ' ')
 end
 
+--- Creates a function that simulates next_char, for testing purposes
+-- The returned function, when called repeated times, returns each character
+-- in sequence. If called with a character, adds that character to the front
+-- of the queue.
+-- @param str The string that represents the simulated input stream
+-- @return A function with semantics identical to next_char
 macros.create_next_char = function(str)
    return function(v)
        if v ~= nil then
