@@ -1,7 +1,7 @@
 macros.demo_argparse = function(next_char)
     local args = macros.argparse(next_char)
     for i, arg in ipairs(args) do
-        print(i, macros.output_tokens(arg))
+        print(i, macros.stringify_tokens(arg))
     end
 end
 

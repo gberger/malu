@@ -147,7 +147,7 @@ end
 -- @param info (Optional) Additional semantic information associated with
 -- the token, such as a string or number
 -- @return A string that represents how the token might appear on Lua code
-macros.output_token = function(token, info)
+macros.stringify_token = function(token, info)
     if token == nil or token == '<eof>' then
         return ''
     elseif token == '<string>' then
@@ -159,13 +159,13 @@ macros.output_token = function(token, info)
     end
 end
 
---- Converts a list of tokens using output_token
+--- Converts a list of tokens using stringify_token
 -- @param list List of tokens, where each token is like {token, info}
 -- @return A string that represents how the tokens might appear on Lua code
-macros.output_tokens = function(list)
+macros.stringify_tokens = function(list)
     local result = {}
     for i, ti in ipairs(list) do
-        result[i] = macros.output_token(ti[1], ti[2])
+        result[i] = macros.stringify_token(ti[1], ti[2])
     end
 
     return table.concat(result, ' ')
@@ -186,7 +186,7 @@ macros.token_filter = function(next_char, filter)
         token, info = macros.next_token(next_char)
     until token == nil
 
-    return macros.output_tokens(filtered)
+    return macros.stringify_tokens(filtered)
 end
 
 --- Creates a function that simulates next_char, for testing purposes

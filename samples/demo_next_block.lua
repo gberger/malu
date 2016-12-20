@@ -4,7 +4,7 @@
    print('Reading block...')
    local block = macros.next_block(next_char)
    print('Read block is:')
-   print(macros.output_tokens(block))
+   print(macros.stringify_tokens(block))
    return ''
 end
 

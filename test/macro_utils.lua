@@ -173,32 +173,32 @@ end
 -----------------------------------------------------------
 
 do
-    print('--testing macros.output_token')
+    print('--testing macros.stringify_token')
 
-    assert(macros.output_token('do', 'do') == 'do')
-    assert(macros.output_token('end', 'end') == 'end')
-    assert(macros.output_token('if', 'if') == 'if')
-    assert(macros.output_token('.', '.') == '.')
-    assert(macros.output_token('<=', '<=') == '<=')
+    assert(macros.stringify_token('do', 'do') == 'do')
+    assert(macros.stringify_token('end', 'end') == 'end')
+    assert(macros.stringify_token('if', 'if') == 'if')
+    assert(macros.stringify_token('.', '.') == '.')
+    assert(macros.stringify_token('<=', '<=') == '<=')
 
-    assert(macros.output_token('<integer>', 100) == 100)
-    assert(macros.output_token('<number>', -3.14) == -3.14)
-    assert(macros.output_token('<name>', 'foo') == 'foo')
-    assert(macros.output_token('<string>', 'hello') == "'hello'")
+    assert(macros.stringify_token('<integer>', 100) == 100)
+    assert(macros.stringify_token('<number>', -3.14) == -3.14)
+    assert(macros.stringify_token('<name>', 'foo') == 'foo')
+    assert(macros.stringify_token('<string>', 'hello') == "'hello'")
 
-    assert(macros.output_token('<string>', '\n') == "'\\10'")
-    assert(macros.output_token('<string>', '\\') == "'\\92'")
-    assert(macros.output_token('<string>', '\"') == "'\\34'")
-    assert(macros.output_token('<string>', '\'') == "'\\39'")
-    assert(macros.output_token('<string>', '[')  == "'\\91'")
-    assert(macros.output_token('<string>', ']')  == "'\\93'")
+    assert(macros.stringify_token('<string>', '\n') == "'\\10'")
+    assert(macros.stringify_token('<string>', '\\') == "'\\92'")
+    assert(macros.stringify_token('<string>', '\"') == "'\\34'")
+    assert(macros.stringify_token('<string>', '\'') == "'\\39'")
+    assert(macros.stringify_token('<string>', '[')  == "'\\91'")
+    assert(macros.stringify_token('<string>', ']')  == "'\\93'")
 end
 
 -----------------------------------------------------------
 
 do
-    print('--testing macros.output_tokens')
-    assert(macros.output_tokens{
+    print('--testing macros.stringify_tokens')
+    assert(macros.stringify_tokens{
         {'do', 'do'},
         {'end', 'end'},
         {'if', 'if'},

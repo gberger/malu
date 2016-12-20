@@ -17,5 +17,5 @@ macros.forall = function(next_char)
         token, info = macros.next_token(next_char)
     until token == 'do'
 
-    return ('for _, %s in ipairs(%s) do'):format(name, macros.output_tokens(iterated))
+    return ('for _, %s in ipairs(%s) do'):format(name, macros.stringify_tokens(iterated))
 end

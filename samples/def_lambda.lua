@@ -53,7 +53,7 @@ macros.enable_lambdas = function(next_char)
             end
 
             if parens_stack > 0 then
-                body[#body+1] = macros.output_token(token, info)
+                body[#body+1] = macros.stringify_token(token, info)
             else
                 state = 1
                 return '<literal>', 'function (' .. table.concat(param_names, ',')
