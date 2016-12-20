@@ -1,4 +1,4 @@
-@loadfile "samples/def_lambda.lua"
+@dofile "samples/def_lambda.lua"
 @enable_lambdas
 
 

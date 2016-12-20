@@ -1,5 +1,5 @@
-@loadfile "malu/def_define.lua"
-@loadfile "samples/def_forall.lua"
+@dofile "malu/def_define.lua"
+@dofile "samples/def_forall.lua"
 
 @define reduce [[
     (function()

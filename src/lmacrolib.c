@@ -129,7 +129,7 @@ static int malu_next_token(lua_State *L) {
 /* }====================================================== */
 
 
-static int malu_loadfile(lua_State *L) {
+static int malu_dofile(lua_State *L) {
   const char *token, *value;
 
   /* token, value = next_token(next_char) */
@@ -159,7 +159,7 @@ static int malu_loadfile(lua_State *L) {
 
 static const luaL_Reg macro_funcs[] = {
     {"next_token", malu_next_token},
-    {"loadfile", malu_loadfile},
+    {"dofile", malu_dofile},
     {NULL, NULL}
 };
 

@@ -1,4 +1,4 @@
-@loadfile "samples/def_defmacro.lua"
+@dofile "samples/def_defmacro.lua"
 
 @defmacro rt do
     local t = {'print(10)'}

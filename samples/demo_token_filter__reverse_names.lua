@@ -1,4 +1,4 @@
-@loadfile "samples/def_defmacro.lua"
+@dofile "samples/def_defmacro.lua"
 
 @defmacro reverse_names do
     return macros.token_filter(next_char, function(t, v)

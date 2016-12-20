@@ -1,4 +1,4 @@
-@loadfile "malu/def_define.lua"
+@dofile "malu/def_define.lua"
 
 @define foreach 'for _, $1 in ipairs($2) do $3 end'
 

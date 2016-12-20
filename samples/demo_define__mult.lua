@@ -1,4 +1,4 @@
-@loadfile "malu/def_define.lua"
+@dofile "malu/def_define.lua"
 
 t = {value = 1}
 

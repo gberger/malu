@@ -1,4 +1,4 @@
-@loadfile "samples/def_forall.lua"
+@dofile "samples/def_forall.lua"
 
 @forall x in {10, 20, 30} do
     print(x)   --> 10   20   30
